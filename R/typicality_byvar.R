@@ -40,7 +40,7 @@
 #' @export
 typicality_byvar <- function(reference, variable, axes = NULL,
                              notable = 0.4, alpha = 0.05,
-                             max_samples = 1e6, seed = NULL, ...) {
+                             max_samples = 1e5, seed = NULL, ...) {
   vexpr <- substitute(variable)
   X_ref <- get_coord(reference, axes = axes, ...)
   n <- nrow(X_ref)

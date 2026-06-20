@@ -42,7 +42,7 @@
 #' @param alpha Level of the compatibility region. Default `0.05`.
 #' @param max_samples Maximum number of samples. Exhaustive enumeration is used
 #'   when \eqn{\binom{n}{n_c} \le} `max_samples`, Monte Carlo otherwise.
-#'   Default `1e6`.
+#'   Default `1e5`, as in the reference script of Le Roux et al. (2019).
 #' @param seed Optional integer seed, used in the Monte Carlo case for
 #'   reproducibility.
 #' @param keep_perm Logical; if `TRUE`, the full vector of permutation
@@ -73,7 +73,7 @@
 #' @export
 typicality_comb <- function(reference, group, level = NULL, axes = NULL,
                             notable = 0.4, alpha = 0.05,
-                            max_samples = 1e6, seed = NULL,
+                            max_samples = 1e5, seed = NULL,
                             keep_perm = FALSE, keep_geometry = TRUE, ...) {
   X_ref <- get_coord(reference, axes = axes, ...)
   if (anyNA(X_ref)) {
@@ -115,17 +115,13 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
   if (nposs <= max_samples) {
     method <- "exhaustive"
     cardJ <- as.integer(nposs)
-    samples <- utils::combn(n, n_c)
-    D2 <- .subset_norm2(Z, samples)
+    D2 <- .subset_norm2(Z, n_c, cardJ, samples = utils::combn(n, n_c))
   } else {
     method <- "montecarlo"
     cardJ <- as.integer(max_samples)
     if (!is.null(seed)) set.seed(seed)
-    D2 <- numeric(cardJ)
-    for (j in seq_len(cardJ)) {
-      m <- colMeans(Z[sample.int(n, n_c), , drop = FALSE])
-      D2[j] <- sum(m * m)
-    }
+    sampler <- function(B) matrix(replicate(B, sample.int(n, n_c)), nrow = n_c)
+    D2 <- .subset_norm2(Z, n_c, cardJ, sampler = sampler)
   }
 
   n_sup <- sum(D2 >= d2_obs * (1 - 1e-12))
@@ -199,14 +195,29 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
        basis = basis, Z = Xc %*% basis, K = ncol(X))
 }
 
-#' Squared norms of the mean points of all subsets given as columns of `samples`
+#' Squared M-norms of subset mean points, computed in batches
+#'
+#' For each size-`n_c` subset of the rows of `Z`, returns the squared norm of
+#' the subset's mean point. Subsets are supplied either exhaustively (as the
+#' columns of the `n_c x J` matrix `samples`) or drawn on demand by
+#' `sampler(B)`, which must return an `n_c x B` matrix of row indices. Each
+#' batch is reduced with a single grouped sum ([rowsum()]) rather than a
+#' per-subset R loop, so the work is a few vectorised operations per batch and
+#' no matrix is allocated per subset.
 #' @noRd
-.subset_norm2 <- function(Z, samples) {
-  J <- ncol(samples)
+.subset_norm2 <- function(Z, n_c, J, samples = NULL, sampler = NULL) {
+  inv2 <- 1 / (n_c * n_c)
+  batch <- max(1L, min(8192L, as.integer(1e6 / n_c)))
   out <- numeric(J)
-  for (j in seq_len(J)) {
-    m <- colMeans(Z[samples[, j], , drop = FALSE])
-    out[j] <- sum(m * m)
+  done <- 0L
+  while (done < J) {
+    B <- min(batch, J - done)
+    cols <- (done + 1L):(done + B)
+    idx <- if (is.null(samples)) sampler(B) else samples[, cols, drop = FALSE]
+    grp <- rep.int(seq_len(B), rep.int(n_c, B))
+    S <- rowsum(Z[as.integer(idx), , drop = FALSE], grp, reorder = FALSE)
+    out[cols] <- rowSums(S * S) * inv2
+    done <- done + B
   }
   out
 }

@@ -10,7 +10,7 @@ typicality_byvar(
   axes = NULL,
   notable = 0.4,
   alpha = 0.05,
-  max_samples = 1e+06,
+  max_samples = 1e+05,
   seed = NULL,
   ...
 )

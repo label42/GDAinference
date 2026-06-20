@@ -30,9 +30,10 @@ test_that("a misaligned variable is rejected", {
 test_that("variables can be named directly when stored in a FactoMineR result", {
   skip_if_not_installed("FactoMineR")
 
-  # Small data so every category stays in exhaustive mode: naming the variable
-  # vs passing the vector must then give *identical* results, proving the
-  # variable is extracted correctly (no Monte Carlo, fully deterministic).
+  # Small data + a high max_samples so every category is enumerated
+  # exhaustively: naming the variable vs passing the vector must then give
+  # *identical* results, proving the variable is extracted correctly (no Monte
+  # Carlo, fully deterministic).
   set.seed(3)
   df <- data.frame(
     a = factor(sample(c("x", "y"), 20, TRUE)),
@@ -42,15 +43,15 @@ test_that("variables can be named directly when stored in a FactoMineR result", 
   )
   mca <- FactoMineR::MCA(df, quali.sup = 4, graph = FALSE, ncp = 5)
 
-  by_name <- typicality_byvar(mca, "degree")
-  by_vec <- typicality_byvar(mca, df$degree)
+  by_name <- typicality_byvar(mca, "degree", max_samples = 1e6)
+  by_vec <- typicality_byvar(mca, df$degree, max_samples = 1e6)
 
   expect_equal(by_name$table$p_value, by_vec$table$p_value)
   expect_identical(nrow(by_name$table), 3L)
 
   # single category, named vs vector
-  r_name <- typicality_comb(mca, group = "degree", level = "Master")
-  r_vec <- typicality_comb(mca, group = df$degree, level = "Master")
+  r_name <- typicality_comb(mca, group = "degree", level = "Master", max_samples = 1e6)
+  r_vec <- typicality_comb(mca, group = df$degree, level = "Master", max_samples = 1e6)
   expect_equal(r_name$p_value, r_vec$p_value)
 
   # unknown variable name is reported clearly

@@ -11,7 +11,7 @@ typicality_comb(
   axes = NULL,
   notable = 0.4,
   alpha = 0.05,
-  max_samples = 1e+06,
+  max_samples = 1e+05,
   seed = NULL,
   keep_perm = FALSE,
   keep_geometry = TRUE,
@@ -54,7 +54,7 @@ thumb).}
 
 \item{max_samples}{Maximum number of samples. Exhaustive enumeration is used
 when \eqn{\binom{n}{n_c} \le} \code{max_samples}, Monte Carlo otherwise.
-Default \code{1e6}.}
+Default \code{1e5}, as in the reference script of Le Roux et al. (2019).}
 
 \item{seed}{Optional integer seed, used in the Monte Carlo case for
 reproducibility.}
