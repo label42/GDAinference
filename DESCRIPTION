@@ -31,6 +31,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/label42/GDA_combinatorial_inference
 BugReports: https://github.com/label42/GDA_combinatorial_inference/issues

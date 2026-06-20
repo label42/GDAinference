@@ -41,6 +41,9 @@
 #'   reproducibility.
 #' @param keep_perm Logical; if `TRUE`, the full vector of permutation
 #'   statistics is stored in the result (component `perm`). Default `FALSE`.
+#' @param keep_geometry Logical; if `TRUE` (default), the coordinates and
+#'   summary geometry needed by [plot.typicality_comb()] are stored in the
+#'   result (component `geometry`). Set to `FALSE` for a lighter object.
 #' @param ... Passed on to [get_coord()].
 #'
 #' @return An object of class `"typicality_comb"` (inheriting
@@ -65,7 +68,7 @@
 typicality_comb <- function(reference, group, axes = NULL,
                             notable = 0.4, alpha = 0.05,
                             max_samples = 1e6, seed = NULL,
-                            keep_perm = FALSE, ...) {
+                            keep_perm = FALSE, keep_geometry = TRUE, ...) {
   X_ref <- get_coord(reference, axes = axes, ...)
   if (anyNA(X_ref)) {
     stop("The reference coordinates contain missing values.", call. = FALSE)
@@ -144,6 +147,14 @@ typicality_comb <- function(reference, group, axes = NULL,
       compatibility = list(type = "ellipsoid", d_alpha = d_alpha),
       seed = seed,
       perm = if (isTRUE(keep_perm)) D2 else NULL,
+      geometry = if (isTRUE(keep_geometry)) list(
+        reference = X_ref,
+        group = X_grp,
+        center = basis$center,
+        group_center = colMeans(X_grp),
+        d_alpha = d_alpha,
+        axis_names = colnames(X_ref)
+      ) else NULL,
       call = match.call()
     ),
     class = c("typicality_comb", "gdainference_test")

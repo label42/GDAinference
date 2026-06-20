@@ -13,6 +13,7 @@ typicality_comb(
   max_samples = 1e+06,
   seed = NULL,
   keep_perm = FALSE,
+  keep_geometry = TRUE,
   ...
 )
 }
@@ -52,6 +53,10 @@ reproducibility.}
 
 \item{keep_perm}{Logical; if \code{TRUE}, the full vector of permutation
 statistics is stored in the result (component \code{perm}). Default \code{FALSE}.}
+
+\item{keep_geometry}{Logical; if \code{TRUE} (default), the coordinates and
+summary geometry needed by \code{\link[=plot.typicality_comb]{plot.typicality_comb()}} are stored in the
+result (component \code{geometry}). Set to \code{FALSE} for a lighter object.}
 
 \item{...}{Passed on to \code{\link[=get_coord]{get_coord()}}.}
 }

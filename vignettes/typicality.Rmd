@@ -1,0 +1,109 @@
+---
+title: "Combinatorial typicality test"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Combinatorial typicality test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## The typicality problem
+
+In Geometric Data Analysis (PCA, MCA, CA, ...) we often observe that the mean
+point of a group of individuals lies far from the centre of the cloud, and we
+want to know whether this deviation is a *genuine* effect or could plausibly be
+due to chance. The **combinatorial typicality test** of
+Le Roux, Bienaise and Durand (2019, chapter 3) answers this question without any
+assumption about the distribution of the data.
+
+It uses as test statistic the squared **Mahalanobis distance** $D^2$ between the
+group mean point and the cloud centre, computed with respect to the covariance
+structure of the reference cloud. Its reference distribution is obtained
+*combinatorially*: by considering every subset of $n_c$ points that can be drawn
+from the $n$ reference points (exhaustively when feasible, by Monte Carlo
+otherwise). The p-value is the proportion of subsets whose statistic is at least
+as large as the observed one.
+
+```{r setup}
+library(GDAinference)
+```
+
+## The "Target" example
+
+We reproduce the worked example of the book. The reference cloud `Target` is a
+set of 10 points in a plane; the group `Target_group` is a set of 4 points whose
+mean we compare with the cloud centre.
+
+```{r data}
+Target
+Target_group
+```
+
+## Running the test
+
+```{r run}
+res <- typicality_comb(Target, Target_group)
+res
+```
+
+The Mahalanobis distance is `D = 0.964`, descriptively *notable* (the rule of
+thumb is a limit of 0.4). The test enumerates the
+$\binom{10}{4} = 210$ possible subsets exhaustively and finds 9 of them at least
+as extreme as the observed deviation, hence an exact p-value of
+$9/210 = 0.043$ -- matching the book.
+
+Every quantity is available programmatically:
+
+```{r components}
+res$statistic              # Mahalanobis distance D
+res$p_value                # combinatorial p-value
+res$n_sup                  # subsets at least as extreme ...
+res$n_perm                 # ... out of this many
+res$compatibility$d_alpha  # scale of the 95% compatibility ellipsoid
+```
+
+## The compatibility region
+
+The `plot()` method shows the reference cloud, the centre **G**, the group mean
+**C**, and the 95% compatibility region -- the principal $d_\alpha$-ellipse of
+the reference cloud centred on **C** (here $d_\alpha = 0.957$). Point **G** lies
+just outside it, the geometric counterpart of $p < 0.05$.
+
+```{r plot, eval = requireNamespace("ggplot2", quietly = TRUE), fig.width = 6, fig.height = 5, fig.alt = "Target reference cloud with the 95% compatibility ellipse centred on the group mean."}
+plot(res)
+```
+
+## Specifying the group as a subset
+
+When the group is a subset of the reference individuals, you can pass a logical
+vector, or row indices / names, instead of a separate coordinate table:
+
+```{r subset}
+typicality_comb(Target, group = c("i1", "i3", "i5"))$p_value
+```
+
+## Working from a GDA result
+
+`typicality_comb()` accepts the result object of the common GDA packages
+directly: the principal coordinates are extracted automatically with
+`get_coord()`. For instance, with **FactoMineR** (the same pattern applies to
+**GDAtools** `speMCA()`/`csMCA()` and **ade4** `dudi.*()` objects):
+
+```{r gda, eval = FALSE}
+library(FactoMineR)
+mca <- MCA(my_data, graph = FALSE, ncp = Inf)        # keep all axes
+typicality_comb(mca, group = my_data$category == "workers", axes = 1:3)
+```
+
+Note that the test is carried out in the subspace spanned by the requested
+`axes`; to obtain the genuine full-cloud test, retain all principal axes in the
+upstream analysis (`ncp = Inf`).
+
+## Reference
+
+Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
+*Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
