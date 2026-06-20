@@ -72,3 +72,21 @@ test_that("print returns its argument invisibly and shows key figures", {
   expect_output(print(res), "p-value")
   expect_invisible(print(res))
 })
+
+test_that("the `level` argument selects a category of a grouping variable", {
+  g <- factor(ifelse(Target$Y >= 0, "upper", "lower"))
+  r_level <- typicality_comb(Target, group = g, level = "upper")
+  r_logical <- typicality_comb(Target, group = g == "upper")
+
+  expect_equal(r_level$p_value, r_logical$p_value)
+  expect_identical(r_level$n_c, sum(g == "upper"))
+})
+
+test_that("misuse of grouping variables errors helpfully", {
+  g <- factor(ifelse(Target$Y >= 0, "upper", "lower"))
+  expect_error(typicality_comb(Target, group = g, level = "nope"),
+               "not a category")
+  expect_error(typicality_comb(Target, group = g), "grouping variable")
+  expect_error(typicality_comb(Target, group = g[1:5], level = "upper"),
+               "aligned")
+})

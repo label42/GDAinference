@@ -25,7 +25,13 @@
 #'     same coordinate system (same axes) as `reference`;
 #'   * a logical vector (length = number of reference points) flagging the
 #'     individuals that make up the group;
-#'   * an integer or character vector indexing reference rows.
+#'   * an integer or character vector indexing reference rows;
+#'   * a grouping variable (a factor / character vector of length \eqn{n}, or
+#'     the name of a variable stored in `reference`) when `level` is also given.
+#' @param level Optional category of the grouping variable `group` that defines
+#'   the group to test (e.g. `level = "Master"`). When supplied, `group` is read
+#'   as a supplementary/grouping variable rather than a direct subset. To test
+#'   every category of a variable at once, use [typicality_byvar()].
 #' @param axes Integer vector of axes (columns of the principal coordinates) on
 #'   which the test is run, or `NULL` (default) for all available axes. Note
 #'   that the test is performed in the subspace spanned by `axes`; to obtain the
@@ -65,7 +71,7 @@
 #' res
 #' res$p_value   # 9 / 210 = 0.0428...
 #' @export
-typicality_comb <- function(reference, group, axes = NULL,
+typicality_comb <- function(reference, group, level = NULL, axes = NULL,
                             notable = 0.4, alpha = 0.05,
                             max_samples = 1e6, seed = NULL,
                             keep_perm = FALSE, keep_geometry = TRUE, ...) {
@@ -77,8 +83,13 @@ typicality_comb <- function(reference, group, axes = NULL,
   if (n < 2L) stop("The reference cloud must have at least 2 points.", call. = FALSE)
   if (alpha <= 0 || alpha >= 1) stop("`alpha` must be in (0, 1).", call. = FALSE)
 
-  grp <- .resolve_group(group, X_ref, axes = axes, ...)
-  X_grp <- grp$coord
+  if (is.null(level)) {
+    grp <- .resolve_group(group, X_ref, axes = axes, ...)
+    X_grp <- grp$coord
+  } else {
+    v <- .as_variable(reference, group, n)
+    X_grp <- X_ref[which(.level_membership(v, level)), , drop = FALSE]
+  }
   n_c <- nrow(X_grp)
   if (n_c < 1L) stop("The group cloud is empty.", call. = FALSE)
   if (n_c >= n) {
@@ -230,6 +241,11 @@ typicality_comb <- function(reference, group, axes = NULL,
       stop("`group` indices do not match the reference rows.", call. = FALSE)
     })
     return(list(coord = sub, kind = "subset"))
+  }
+  if (is.factor(group)) {
+    stop("`group` looks like a grouping variable (a factor). To test one ",
+         "category, also supply `level = \"...\"`; to test every category, use ",
+         "typicality_byvar().", call. = FALSE)
   }
   stop("Unsupported `group` type: ", paste(class(group), collapse = "/"), ".",
        call. = FALSE)

@@ -7,6 +7,7 @@
 typicality_comb(
   reference,
   group,
+  level = NULL,
   axes = NULL,
   notable = 0.4,
   alpha = 0.05,
@@ -30,8 +31,15 @@ centre. One of:
 same coordinate system (same axes) as \code{reference};
 \item a logical vector (length = number of reference points) flagging the
 individuals that make up the group;
-\item an integer or character vector indexing reference rows.
+\item an integer or character vector indexing reference rows;
+\item a grouping variable (a factor / character vector of length \eqn{n}, or
+the name of a variable stored in \code{reference}) when \code{level} is also given.
 }}
+
+\item{level}{Optional category of the grouping variable \code{group} that defines
+the group to test (e.g. \code{level = "Master"}). When supplied, \code{group} is read
+as a supplementary/grouping variable rather than a direct subset. To test
+every category of a variable at once, use \code{\link[=typicality_byvar]{typicality_byvar()}}.}
 
 \item{axes}{Integer vector of axes (columns of the principal coordinates) on
 which the test is run, or \code{NULL} (default) for all available axes. Note

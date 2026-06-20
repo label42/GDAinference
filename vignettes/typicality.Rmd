@@ -86,6 +86,33 @@ vector, or row indices / names, instead of a separate coordinate table:
 typicality_comb(Target, group = c("i1", "i3", "i5"))$p_value
 ```
 
+## Testing the categories of a supplementary variable
+
+The most common use in practice: a category of a supplementary variable (say
+"Master" for *degree*) defines a subcloud, and we ask whether its mean point is
+atypical of the whole cloud. Give the variable and the category with `level =`:
+
+```{r level}
+taste <- factor(ifelse(Target$Y >= 0, "upper", "lower"))   # toy variable
+typicality_comb(Target, group = taste, level = "upper")$p_value
+```
+
+To test **every** category at once, use `typicality_byvar()`. It returns a tidy
+table -- the multidimensional, exact counterpart of GDAtools' `dimtypicality()`:
+
+```{r byvar}
+typicality_byvar(Target, taste)
+```
+
+When the variable is stored in the analysis (e.g. a `quali.sup` variable of a
+FactoMineR `MCA`), you can name it directly instead of passing a vector:
+
+```{r byvar-name, eval = FALSE}
+mca <- FactoMineR::MCA(music, quali.sup = "degree", graph = FALSE, ncp = Inf)
+typicality_byvar(mca, "degree")                            # all categories
+typicality_comb(mca, group = "degree", level = "Master")   # just one
+```
+
 ## Working from a GDA result
 
 `typicality_comb()` accepts the result object of the common GDA packages
