@@ -1,0 +1,27 @@
+citHeader(
+  "GDAinference implements the statistical methods of Le Roux, Bienaise and",
+  "Durand (2019). Please cite the book when you use these tests, and",
+  "optionally the package."
+)
+
+bibentry(
+  bibtype  = "Book",
+  title    = "Combinatorial Inference in Geometric Data Analysis",
+  author   = c(person("Brigitte", "Le Roux"),
+               person("Solène", "Bienaise"),
+               person("Jean-Luc", "Durand")),
+  year     = "2019",
+  publisher = "Chapman & Hall/CRC",
+  series   = "Computer Science and Data Analysis",
+  key      = "leroux2019"
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "GDAinference: Combinatorial Inference in Geometric Data Analysis",
+  author   = person("Abel", "Aussant"),
+  year     = format(Sys.Date(), "%Y"),
+  note     = "R package implementing the tests of Le Roux, Bienaise & Durand (2019)",
+  url      = "https://github.com/label42/GDA_combinatorial_inference",
+  key      = "GDAinference-pkg"
+)

@@ -1,0 +1,37 @@
+Package: GDAinference
+Title: Combinatorial Inference in Geometric Data Analysis
+Version: 0.0.0.9000
+Authors@R:
+    person("Abel", "Aussant", email = "abel.aussant@gmail.com",
+           role = c("aut", "cre"))
+Description: Exact combinatorial (permutation) inference tests for Geometric
+    Data Analysis (GDA). The package implements the multidimensional
+    typicality and homogeneity tests introduced by Le Roux, Bienaise and
+    Durand (2019, "Combinatorial Inference in Geometric Data Analysis",
+    Chapman & Hall/CRC). Tests operate on the principal coordinates produced
+    by common GDA methods and integrate natively with the 'FactoMineR',
+    'GDAtools' and 'ade4' packages, as well as with plain coordinate matrices.
+    Each test returns a p-value from the combinatorial distribution of a
+    Mahalanobis-type statistic, together with a compatibility region. Unlike
+    the chi-squared approximations sometimes used in practice, the tests are
+    exact (exhaustive enumeration when feasible, Monte Carlo otherwise).
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.0.0)
+Imports:
+    utils
+Suggests:
+    FactoMineR,
+    GDAtools,
+    ade4,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+LazyData: true
+URL: https://github.com/label42/GDA_combinatorial_inference
+BugReports: https://github.com/label42/GDA_combinatorial_inference/issues
+Config/roxygen2/version: 8.0.0
