@@ -28,6 +28,7 @@ Suggests:
     ade4,
     ggplot2,
     knitr,
+    questionr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
