@@ -1,0 +1,157 @@
+---
+title: "Geometric typicality: testing repeated-measures effects"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Geometric typicality: testing repeated-measures effects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+needed <- c("carData", "ggplot2")
+ok <- all(vapply(needed, requireNamespace, logical(1), quietly = TRUE))
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>", eval = ok,
+  fig.width = 6.5, fig.height = 5, fig.align = "center"
+)
+```
+
+## The repeated-measures problem
+
+A classic design measures each unit **twice** -- before and after a treatment,
+or under two conditions. For every subject $i$ we then have an *effect*: the
+deviation between the two measurements. The question is whether the **mean
+effect** is a genuine one, or could just be the luck of the signs:
+
+> If the treatment did nothing, each subject's effect would be just as likely to
+> point one way as the other. So we can build a reference distribution by
+> flipping the sign of each subject's effect in every possible way, and ask how
+> extreme the observed mean effect is.
+
+This is exactly the **geometric typicality test** of Le Roux, Bienaise & Durand
+(2019, ch. 4): `typicality_geom()` compares the mean point of a cloud (here, the
+cloud of individual effects) to a fixed **reference point** (here the origin
+`0` = "no effect"), using the cloud's own covariance and the
+$2^{n-1}$ sign-flips. It returns a p-value and a **compatibility region**.
+
+```{r load}
+library(GDAinference)
+library(ggplot2)
+```
+
+## One measurement: Student's sleep data
+
+The historical example is Student's (1908) sleep experiment, shipped with R as
+`datasets::sleep`: ten patients each received two soporific drugs, and the
+variable `extra` records the extra hours of sleep. The *effect* for each patient
+is the difference between the two drugs.
+
+```{r sleep}
+effect <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
+effect
+typicality_geom(matrix(effect, ncol = 1), point = 0)
+```
+
+Because there is a single measurement, the test is **one-dimensional** and
+one-sided. Nine of the ten effects are positive (one is null), so the observed
+mean is essentially the most extreme of the $2^9$ sign-flips: the p-value is
+$1/2^9 \approx 0.002$, far below 0.05. The mean effect is **atypical** of zero --
+drug 2 is genuinely superior. Equivalently, the 95% compatibility interval
+$[0.83,\, 2.47]$ does not contain 0.
+
+(These ten effects are also shipped as the `Student` data set; the numbers
+reproduce the book's §4.4.1 example exactly.)
+
+## Several measurements: a two-dimensional effect
+
+When **several** variables are measured before and after, the effect of each
+subject is a *point*, and the test works in the corresponding space. We use
+`carData::WeightLoss`: 34 people in three groups (`Control`, `Diet`,
+`DietEx` = diet + exercise), with weekly **weight loss** and **self-esteem**
+recorded at weeks 1, 2 and 3. For each subject we take the change from week 1 to
+week 3 on *both* variables:
+
+```{r weightloss-data}
+data("WeightLoss", package = "carData")
+change <- with(WeightLoss, cbind(
+  "weight-loss change" = wl3 - wl1,
+  "self-esteem change" = se3 - se1
+))
+head(change)
+```
+
+Is the mean change point of each group different from "no change" = $(0, 0)$?
+
+```{r weightloss-test}
+groups <- levels(WeightLoss$group)
+do.call(rbind, lapply(groups, function(g) {
+  res <- typicality_geom(change[WeightLoss$group == g, ], point = c(0, 0), seed = 1)
+  data.frame(group = g, n = res$n,
+             D = round(res$statistic, 2),
+             p_value = round(res$p_value, 4),
+             notable = res$notable)
+}))
+```
+
+Every group shows a notable, significant change, of increasing magnitude from
+`Control` to `DietEx`. The `plot()` method shows *how* a group moved -- here the
+control group:
+
+```{r weightloss-plot, fig.alt = "Compatibility ellipse for the control group's mean change vector."}
+res_ctrl <- typicality_geom(change[WeightLoss$group == "Control", ],
+                            point = c(0, 0), seed = 1)
+plot(res_ctrl)
+```
+
+The cloud of individual change-points has its mean **G** displaced to the
+*left* of the reference point **P** = $(0,0)$: the controls' weekly weight loss
+slowed down (a natural tapering), while their self-esteem barely moved
+vertically. **P** lies outside the dashed compatibility ellipse, so the change
+is atypical -- but the displacement is almost entirely along one axis.
+
+### Reading the dimensions
+
+A multidimensional test can be significant for different reasons in different
+groups. Testing each axis on its own makes this explicit:
+
+```{r weightloss-axes}
+per_axis <- function(g) {
+  m <- change[WeightLoss$group == g, ]
+  c(weight_loss = typicality_geom(m[, 1, drop = FALSE], point = 0)$p_value,
+    self_esteem = typicality_geom(m[, 2, drop = FALSE], point = 0)$p_value)
+}
+round(t(sapply(groups, per_axis)), 4)
+```
+
+The picture is now clear: **everyone's weekly weight loss slowed** (all atypical
+on axis 1), but **self-esteem rose only under the active regimes** -- the control
+group's self-esteem change is *compatible* with zero ($p \approx 0.36$), whereas
+`Diet` and `DietEx` are atypical. The two-dimensional test captures the joint
+effect; the per-axis view shows which dimension carries it.
+
+## Using it inside a GDA
+
+The same test answers a common GDA question: **is a subgroup's mean point at the
+origin of the cloud?** Pass a `FactoMineR`/`GDAtools`/`ade4` result and
+`point = 0` (the cloud's centre), optionally restricting to a category:
+
+```{r gda, eval = FALSE}
+res_mca <- FactoMineR::MCA(my_data, graph = FALSE)
+typicality_geom(res_mca, group = my_data$category, level = "X", point = 0, axes = 1:2)
+```
+
+## Practical notes
+
+* **Exact vs. Monte Carlo.** With up to ~17 subjects the $2^{n-1}$ sign-flips are
+  enumerated exactly; beyond that, `max_samples` of them are drawn at random (set
+  `seed` for reproducibility).
+* **One vs. several dimensions.** In 1-D the p-value is one-sided and the
+  compatibility region is an exact interval; in higher dimensions it is a
+  $\kappa$-ellipse adjusted from random directions (`n_dir`).
+* **Reference point.** `point` defaults to the origin (`0`); pass any point to
+  test a different null.
+
+## Reference
+
+Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
+*Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.

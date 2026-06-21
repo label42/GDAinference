@@ -26,6 +26,11 @@
   worked example on `questionr::hdv2003` (FactoMineR MCA), with cloud
   interpretation, plots and guidance on reading the tests (notably the
   distinction between a *significant* and a *notable* deviation).
+* Tutorial vignette "Geometric typicality: testing repeated-measures effects" —
+  a worked example on real before/after data (`datasets::sleep` for the
+  one-dimensional case, `carData::WeightLoss` for a two-dimensional effect),
+  covering the compatibility interval, the kappa-ellipse, and how a
+  multidimensional test relates to its per-axis views.
 * Compatibility documented and backed by integration tests: formally tested on
   FactoMineR (`PCA`, `MCA`), GDAtools (`speMCA`, `csMCA`) and ade4 (`dudi.pca`,
   `dudi.acm`); other similarly-structured GDA objects are expected to work but

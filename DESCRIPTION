@@ -23,9 +23,10 @@ Depends:
 Imports:
     utils
 Suggests:
+    ade4,
+    carData,
     FactoMineR,
     GDAtools,
-    ade4,
     ggplot2,
     knitr,
     questionr,
