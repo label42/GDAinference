@@ -6,16 +6,19 @@
 #' packages, so that the inference tests can be run uniformly whatever the
 #' upstream GDA tool.
 #'
-#' Supported inputs:
+#' **Formally tested** object types (see the package's integration tests):
 #' \itemize{
-#'   \item a numeric `matrix` or `data.frame` of coordinates (returned as is,
-#'     after axis selection);
-#'   \item \pkg{FactoMineR} results: `PCA`, `MCA`, `FAMD` (individual
-#'     coordinates) and `CA` (row coordinates);
-#'   \item \pkg{GDAtools} results: `speMCA`, `csMCA`, `bcMCA`, `wcMCA`,
-#'     `stMCA`, `multiMCA` (individual coordinates);
-#'   \item \pkg{ade4} results: any `dudi` (row coordinates, slot `li`).
+#'   \item a numeric `matrix` or `data.frame` of coordinates;
+#'   \item \pkg{FactoMineR}: `PCA` and `MCA`;
+#'   \item \pkg{GDAtools}: `speMCA` and `csMCA`;
+#'   \item \pkg{ade4}: `dudi.pca` and `dudi.acm`.
 #' }
+#'
+#' Other object types that share the same structure are **expected to work but
+#' are not formally tested**: \pkg{FactoMineR} `FAMD` and `CA`; \pkg{GDAtools}
+#' `bcMCA`, `wcMCA`, `stMCA`, `multiMCA`; and other \pkg{ade4} `dudi` objects
+#' (e.g. `dudi.coa`). For an unsupported object you can always extract the
+#' principal coordinates yourself and pass them as a matrix.
 #'
 #' @param x A GDA result object or a numeric matrix/data frame of coordinates.
 #' @param axes Integer vector of axes (columns) to keep, or `NULL` (default)

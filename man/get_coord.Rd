@@ -62,16 +62,19 @@ packages, so that the inference tests can be run uniformly whatever the
 upstream GDA tool.
 }
 \details{
-Supported inputs:
+\strong{Formally tested} object types (see the package's integration tests):
 \itemize{
-\item a numeric \code{matrix} or \code{data.frame} of coordinates (returned as is,
-after axis selection);
-\item \pkg{FactoMineR} results: \code{PCA}, \code{MCA}, \code{FAMD} (individual
-coordinates) and \code{CA} (row coordinates);
-\item \pkg{GDAtools} results: \code{speMCA}, \code{csMCA}, \code{bcMCA}, \code{wcMCA},
-\code{stMCA}, \code{multiMCA} (individual coordinates);
-\item \pkg{ade4} results: any \code{dudi} (row coordinates, slot \code{li}).
+\item a numeric \code{matrix} or \code{data.frame} of coordinates;
+\item \pkg{FactoMineR}: \code{PCA} and \code{MCA};
+\item \pkg{GDAtools}: \code{speMCA} and \code{csMCA};
+\item \pkg{ade4}: \code{dudi.pca} and \code{dudi.acm}.
 }
+
+Other object types that share the same structure are \strong{expected to work but
+are not formally tested}: \pkg{FactoMineR} \code{FAMD} and \code{CA}; \pkg{GDAtools}
+\code{bcMCA}, \code{wcMCA}, \code{stMCA}, \code{multiMCA}; and other \pkg{ade4} \code{dudi} objects
+(e.g. \code{dudi.coa}). For an unsupported object you can always extract the
+principal coordinates yourself and pass them as a matrix.
 }
 \examples{
 m <- matrix(rnorm(20), ncol = 2, dimnames = list(NULL, c("Dim1", "Dim2")))

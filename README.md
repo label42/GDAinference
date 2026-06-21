@@ -35,11 +35,22 @@ otherwise — and the associated compatibility regions.
 
 The tests accept a plain coordinate matrix **or**, natively, the result object
 of the most common GDA packages — the principal coordinates are extracted
-automatically via `get_coord()`:
+automatically via `get_coord()`.
 
-* **FactoMineR** — `PCA`, `MCA`, `FAMD`, `CA`
-* **GDAtools** — `speMCA`, `csMCA`, `bcMCA`, `wcMCA`, `stMCA`, `multiMCA`
-* **ade4** — any `dudi` (e.g. `dudi.pca`, `dudi.acm`, `dudi.coa`)
+**Formally tested** (see the package's integration tests, run on real survey
+data analysed with each package):
+
+| Package | Tested objects |
+|---|---|
+| **FactoMineR** | `PCA`, `MCA` |
+| **GDAtools** | `speMCA`, `csMCA` |
+| **ade4** | `dudi.pca`, `dudi.acm` |
+| base R | numeric `matrix` / `data.frame` of coordinates |
+
+Other objects with the same structure are **expected to work but are not yet
+formally tested**: FactoMineR `FAMD` / `CA`; GDAtools `bcMCA`, `wcMCA`, `stMCA`,
+`multiMCA`; other ade4 `dudi` objects (e.g. `dudi.coa`). For anything else, you
+can extract the principal coordinates yourself and pass them as a matrix.
 
 ## Installation
 

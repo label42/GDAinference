@@ -1,134 +1,187 @@
 ---
-title: "Combinatorial typicality test"
+title: "Combinatorial typicality testing on an MCA: a tutorial"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Combinatorial typicality test}
+  %\VignetteIndexEntry{Combinatorial typicality testing on an MCA: a tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```{r setup, include = FALSE}
+needed <- c("questionr", "FactoMineR", "ggplot2")
+ok <- all(vapply(needed, requireNamespace, logical(1), quietly = TRUE))
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>", eval = ok,
+  fig.width = 7, fig.height = 5.2, fig.align = "center"
+)
 ```
 
-## The typicality problem
+## What this tutorial is about
 
-In Geometric Data Analysis (PCA, MCA, CA, ...) we often observe that the mean
-point of a group of individuals lies far from the centre of the cloud, and we
-want to know whether this deviation is a *genuine* effect or could plausibly be
-due to chance. The **combinatorial typicality test** of
-Le Roux, Bienaise and Durand (2019, chapter 3) answers this question without any
-assumption about the distribution of the data.
+Geometric Data Analysis (MCA, PCA, CA, …) builds a *cloud of individuals* and
+lets us describe oppositions between groups. But description alone leaves a
+question open: when a group's mean point sits away from the centre of the cloud,
+**is that a genuine effect, or could it just be the luck of the draw?**
 
-It uses as test statistic the squared **Mahalanobis distance** $D^2$ between the
-group mean point and the cloud centre, computed with respect to the covariance
-structure of the reference cloud. Its reference distribution is obtained
-*combinatorially*: by considering every subset of $n_c$ points that can be drawn
-from the $n$ reference points (exhaustively when feasible, by Monte Carlo
-otherwise). The p-value is the proportion of subsets whose statistic is at least
-as large as the observed one.
+`GDAinference` answers this with the **combinatorial typicality test** of
+Le Roux, Bienaise & Durand (2019). It is a *permutation* test, so it makes no
+assumption about the distribution of the data: it compares the group's observed
+position to what would happen for *all possible* groups of the same size drawn
+from the cloud. It returns two things:
 
-```{r setup}
+* a **p-value** — the proportion of random groups that deviate at least as much
+  as the observed one (small p ⇒ the group is *atypical*);
+* a **compatibility region** — an ellipse showing where the group mean could
+  plausibly lie.
+
+Throughout, the test statistic is the **Mahalanobis distance `D`** between the
+group mean and the cloud centre. As a rule of thumb the deviation is called
+*notable* when `D ≥ 0.4`. Keep that number in mind — we will see that *notable*
+and *significant* are not the same thing.
+
+We will work end to end on a real survey.
+
+## The data and the MCA
+
+We use `hdv2003` from **questionr** (2000 respondents to the French
+"Histoire de vie" survey) and seven yes/no cultural and leisure practices. We
+build a standard MCA with **FactoMineR**, adding `sexe` and `occup` (activity
+status) as supplementary variables and `age` as a supplementary numeric
+variable, so they do not shape the cloud but can be located on it.
+
+```{r load}
 library(GDAinference)
+library(FactoMineR)
+library(ggplot2)
+data("hdv2003", package = "questionr")
+
+active <- c("hard.rock", "lecture.bd", "peche.chasse",
+            "cuisine", "bricol", "cinema", "sport")
+d <- hdv2003[, c(active, "sexe", "occup", "age")]
+
+mca <- MCA(d, quali.sup = 8:9, quanti.sup = 10, ncp = Inf, graph = FALSE)
+round(mca$eig[1:3, ], 2)
 ```
 
-## The "Target" example
+The first plane (axes 1–2) carries the main structure, so we will read the
+typicality tests on it. (MCA's raw inertia rates are notoriously pessimistic;
+what matters here is the *geometry* of the plane, not the percentages.)
 
-We reproduce the worked example of the book. The reference cloud `Target` is a
-set of 10 points in a plane; the group `Target_group` is a set of 4 points whose
-mean we compare with the cloud centre.
+## Reading the cloud
 
-```{r data}
-Target
-Target_group
+Before testing anything, we must understand what the axes *mean* — otherwise a
+p-value is just a number. The map below shows the active categories (grey) and
+the activity-status groups (orange).
+
+```{r map, fig.alt = "Map of the first MCA plane: active categories and occupation groups."}
+cats <- function(coord, type) {
+  df <- as.data.frame(coord[, 1:2]); names(df) <- c("D1", "D2")
+  data.frame(label = rownames(df), D1 = df$D1, D2 = df$D2, type = type)
+}
+map <- rbind(
+  cats(mca$var$coord, "leisure category"),
+  cats(mca$quali.sup$coord[levels(hdv2003$occup), ], "occupation")
+)
+
+ggplot(map, aes(D1, D2, colour = type, label = label)) +
+  geom_hline(yintercept = 0, colour = "grey85") +
+  geom_vline(xintercept = 0, colour = "grey85") +
+  geom_point() +
+  geom_text(size = 3, vjust = -0.6, show.legend = FALSE) +
+  scale_colour_manual(values = c("leisure category" = "grey45",
+                                 "occupation" = "#D95F02")) +
+  coord_equal() + theme_minimal() +
+  labs(x = "Axis 1 (volume of practices)",
+       y = "Axis 2 (outdoor vs. urban-cultural)", colour = NULL)
 ```
 
-## Running the test
+Two clear oppositions emerge:
 
-```{r run}
-res <- typicality_comb(Target, Target_group)
-res
+* **Axis 1 — the *volume* of practices.** On the right sit the "Oui" categories
+  (`hard.rock`, `lecture.bd`, `sport`, `cinema`); on the left, the "Non"
+  categories. The right means *does many things*, the left *does few*. The
+  supplementary variable `age` correlates −0.44 with this axis: **older
+  respondents are on the left** (fewer practices), younger on the right.
+* **Axis 2 — the *kind* of practice.** At the top, outdoor/manual leisure
+  (`peche.chasse` stands out, with `bricol`); at the bottom, urban-cultural
+  leisure (`lecture.bd`, `cinema`, `hard.rock`).
+
+The orange occupation points already tell a story: **students** sit far to the
+lower right (young, many and urban-cultural practices), **retired** people to
+the left (older, fewer practices), while the **employed** and the **unemployed**
+sit close to the centre. Typicality testing turns this visual impression into a
+formal statement.
+
+## A first test: are students atypical?
+
+```{r students}
+students <- typicality_comb(mca, group = "occup", level = "Etudiant, eleve",
+                            axes = 1:2, seed = 1)
+students
 ```
 
-The Mahalanobis distance is `D = 0.964`, descriptively *notable* (the rule of
-thumb is a limit of 0.4). The test enumerates the
-$\binom{10}{4} = 210$ possible subsets exhaustively and finds 9 of them at least
-as extreme as the observed deviation, hence an exact p-value of
-$9/210 = 0.043$ -- matching the book.
+The Mahalanobis distance is `D ≈ 0.97` — well above the 0.4 *notable* limit —
+and the p-value is ≈ 0: among all groups of 94 individuals one could draw from
+the cloud, essentially none deviates as much as the students do. Students are
+**atypical**, and the map tells us *how*: they are pulled toward the
+"young / many / urban-cultural" corner.
 
-Every quantity is available programmatically:
+The `plot()` method makes this geometric:
 
-```{r components}
-res$statistic              # Mahalanobis distance D
-res$p_value                # combinatorial p-value
-res$n_sup                  # subsets at least as extreme ...
-res$n_perm                 # ... out of this many
-res$compatibility$d_alpha  # scale of the 95% compatibility ellipsoid
+```{r students-plot, fig.alt = "Compatibility ellipse for the students' mean point."}
+plot(students)
 ```
 
-## The compatibility region
+The dashed ellipse is the **95% compatibility region** for the students' mean
+point **C** (orange). The cloud centre **G** (black) lies far outside it, which
+is the geometric face of `p < 0.05`. Notice how *small* the ellipse is: with
+2000 individuals the mean is pinned down very precisely, so even moderate
+deviations become detectable. More data ⇒ smaller region ⇒ easier to certify a
+genuine effect.
 
-The `plot()` method shows the reference cloud, the centre **G**, the group mean
-**C**, and the 95% compatibility region -- the principal $d_\alpha$-ellipse of
-the reference cloud centred on **C** (here $d_\alpha = 0.957$). Point **G** lies
-just outside it, the geometric counterpart of $p < 0.05$.
+## The key lesson: *significant* is not *notable*
 
-```{r plot, eval = requireNamespace("ggplot2", quietly = TRUE), fig.width = 6, fig.height = 5, fig.alt = "Target reference cloud with the 95% compatibility ellipse centred on the group mean."}
-plot(res)
-```
-
-## Specifying the group as a subset
-
-When the group is a subset of the reference individuals, you can pass a logical
-vector, or row indices / names, instead of a separate coordinate table:
-
-```{r subset}
-typicality_comb(Target, group = c("i1", "i3", "i5"))$p_value
-```
-
-## Testing the categories of a supplementary variable
-
-The most common use in practice: a category of a supplementary variable (say
-"Master" for *degree*) defines a subcloud, and we ask whether its mean point is
-atypical of the whole cloud. Give the variable and the category with `level =`:
-
-```{r level}
-taste <- factor(ifelse(Target$Y >= 0, "upper", "lower"))   # toy variable
-typicality_comb(Target, group = taste, level = "upper")$p_value
-```
-
-To test **every** category at once, use `typicality_byvar()`. It returns a tidy
-table -- the multidimensional, exact counterpart of GDAtools' `dimtypicality()`:
+Let us now test every activity-status group at once, on the plane:
 
 ```{r byvar}
-typicality_byvar(Target, taste)
+typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
 ```
 
-When the variable is stored in the analysis (e.g. a `quali.sup` variable of a
-FactoMineR `MCA`), you can name it directly instead of passing a vector:
+Read this table carefully — it contains the whole philosophy of the method:
 
-```{r byvar-name, eval = FALSE}
-mca <- FactoMineR::MCA(music, quali.sup = "degree", graph = FALSE, ncp = Inf)
-typicality_byvar(mca, "degree")                            # all categories
-typicality_comb(mca, group = "degree", level = "Master")   # just one
-```
+* **Chômeur** (unemployed): `D ≈ 0.13`, p ≈ 0.31. The deviation is tiny *and*
+  not significant: the unemployed are **compatible** with the cloud as a whole —
+  on this plane they look like everyone else (they sit near the centre).
+* **Exerce une profession** (employed) and **Au foyer** (homemakers):
+  `p ≈ 0`, yet `D < 0.4`. These deviations are **statistically significant but
+  descriptively small**. With n = 1049 employed respondents, the test detects a
+  real but minute displacement. This is the large-sample caveat that the
+  *notable* threshold is designed to catch: **do not mistake a significant
+  p-value for an important effect.** Always read `D` alongside `p`.
+* **Students, retired, "retired from business", other inactive**: both
+  `notable` (`D ≥ 0.4`) **and** significant. These are the genuinely atypical
+  groups — and, reading the map, they are atypical in *opposite* directions
+  along axis 1 (students young/active, retired older/less active).
 
-## Working from a GDA result
+This three-way reading — *compatible* / *significant-but-small* / *notable and
+significant* — is exactly what combinatorial inference is meant to support.
 
-`typicality_comb()` accepts the result object of the common GDA packages
-directly: the principal coordinates are extracted automatically with
-`get_coord()`. For instance, with **FactoMineR** (the same pattern applies to
-**GDAtools** `speMCA()`/`csMCA()` and **ade4** `dudi.*()` objects):
+## Practical notes
 
-```{r gda, eval = FALSE}
-library(FactoMineR)
-mca <- MCA(my_data, graph = FALSE, ncp = Inf)        # keep all axes
-typicality_comb(mca, group = my_data$category == "workers", axes = 1:3)
-```
-
-Note that the test is carried out in the subspace spanned by the requested
-`axes`; to obtain the genuine full-cloud test, retain all principal axes in the
-upstream analysis (`ncp = Inf`).
+* **Which axes?** The test runs in the subspace you pass through `axes`. Here we
+  used the first plane (`axes = 1:2`) because that is what we interpreted. To
+  test the deviation in the *full* cloud, keep all axes (`ncp = Inf` in the MCA)
+  and call with `axes = NULL`.
+* **Naming vs. passing a variable.** Because `occup` is stored in the MCA
+  object, we referred to it by name (`"occup"`). You can equally pass the vector
+  (`group = hdv2003$occup`), which is the way to go for objects that do not store
+  the variable (e.g. GDAtools `speMCA`).
+* **Exact vs. Monte Carlo.** With small clouds the test enumerates *all* subsets
+  (exact); with large ones like this it draws `max_samples` of them. Set `seed`
+  for reproducible Monte Carlo p-values.
+* **Other GDA packages.** The very same calls work on a GDAtools `speMCA` /
+  `csMCA` or an ade4 `dudi.pca` / `dudi.acm` — just pass that object instead of
+  the FactoMineR one.
 
 ## Reference
 

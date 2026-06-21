@@ -15,5 +15,12 @@
 * `typicality_byvar()`: run the test for every category of a variable at once,
   returning a tidy table (the multidimensional, exact counterpart of GDAtools'
   `dimtypicality()`).
-* Vignette "Combinatorial typicality test" reproducing the Target example.
+* Tutorial vignette "Combinatorial typicality testing on an MCA" — a full
+  worked example on `questionr::hdv2003` (FactoMineR MCA), with cloud
+  interpretation, plots and guidance on reading the tests (notably the
+  distinction between a *significant* and a *notable* deviation).
+* Compatibility documented and backed by integration tests: formally tested on
+  FactoMineR (`PCA`, `MCA`), GDAtools (`speMCA`, `csMCA`) and ade4 (`dudi.pca`,
+  `dudi.acm`); other similarly-structured GDA objects are expected to work but
+  are not yet formally tested.
 * Bundled example data sets: `Target`, `Target_group`, `Student`.
