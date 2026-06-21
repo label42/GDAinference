@@ -105,3 +105,98 @@ plot.typicality_comb <- function(x, axes = c(1, 2), ...) {
         format(geo$d_alpha, digits = 3))) +
     ggplot2::theme_minimal()
 }
+
+#' Plot a geometric typicality test
+#'
+#' Displays, on a plane of two axes, the cloud, its mean point G, the reference
+#' point P, and the \eqn{(1-\alpha)} compatibility region: the principal
+#' \eqn{\kappa}-ellipse of the cloud, centred on G. When P falls outside the
+#' ellipse, the mean point is atypical of P at level \eqn{\alpha}.
+#'
+#' Requires the \pkg{ggplot2} package and a two- (or more) dimensional analysis.
+#'
+#' @param x A `typicality_geom` object created with `keep_geometry = TRUE`
+#'   (the default of [typicality_geom()]).
+#' @param axes Length-2 integer vector giving the two axes to display.
+#'   Default `c(1, 2)`.
+#' @param ... Currently ignored.
+#'
+#' @return A \pkg{ggplot2} object (drawn when printed).
+#'
+#' @seealso [typicality_geom()]
+#'
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' plot(typicality_geom(Target, point = c(0, 0)))
+#' @export
+plot.typicality_geom <- function(x, axes = c(1, 2), ...) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required for plotting; install it, or use ",
+         "print() for a text summary.", call. = FALSE)
+  }
+  geo <- x$geometry
+  if (is.null(geo)) {
+    stop("No stored geometry to plot. Re-run typicality_geom() with ",
+         "keep_geometry = TRUE.", call. = FALSE)
+  }
+  if (length(axes) != 2L || anyNA(axes)) {
+    stop("`axes` must be a length-2 vector of axis indices.", call. = FALSE)
+  }
+  cl <- geo$cloud
+  if (ncol(cl) < 2L) {
+    stop("Plotting requires at least 2 axes; this analysis is ",
+         "one-dimensional (see the compatibility interval in print()).",
+         call. = FALSE)
+  }
+  if (is.null(geo$kappa) || is.na(geo$kappa)) {
+    stop("No finite compatibility region to plot for this result.", call. = FALSE)
+  }
+  i <- axes[1L]
+  j <- axes[2L]
+  if (max(i, j) > ncol(cl) || min(i, j) < 1L) {
+    stop("`axes` must lie between 1 and ", ncol(cl),
+         " (the number of analysed axes).", call. = FALSE)
+  }
+
+  nm <- geo$axis_names
+  if (is.null(nm)) nm <- paste0("Axis ", seq_len(ncol(cl)))
+
+  cl2 <- cl[, c(i, j), drop = FALSE]
+  g <- colMeans(cl2)
+  p <- geo$point[c(i, j)]
+  s <- crossprod(sweep(cl2, 2, g, "-")) / nrow(cl2)
+  e <- eigen(s, symmetric = TRUE)
+  th <- seq(0, 2 * pi, length.out = 200L)
+  ell <- e$vectors %*% diag(sqrt(pmax(e$values, 0)), 2L) %*%
+    rbind(cos(th), sin(th)) * geo$kappa
+
+  df_pts <- data.frame(px = cl2[, 1L], py = cl2[, 2L])
+  df_ell <- data.frame(px = g[1L] + ell[1L, ], py = g[2L] + ell[2L, ])
+  df_key <- data.frame(
+    px = c(g[1L], p[1L]), py = c(g[2L], p[2L]),
+    plabel = c("G (mean point)", "P (reference point)")
+  )
+
+  ggplot2::ggplot() +
+    ggplot2::geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey85") +
+    ggplot2::geom_vline(xintercept = 0, linewidth = 0.3, colour = "grey85") +
+    ggplot2::geom_path(
+      data = df_ell, ggplot2::aes(x = px, y = py),
+      linetype = "dashed", colour = "grey30") +
+    ggplot2::geom_point(
+      data = df_pts, ggplot2::aes(x = px, y = py), colour = "grey45") +
+    ggplot2::geom_point(
+      data = df_key, ggplot2::aes(x = px, y = py, colour = plabel), size = 3.5) +
+    ggplot2::scale_colour_manual(
+      values = c("G (mean point)" = "black",
+                 "P (reference point)" = "#D95F02")) +
+    ggplot2::coord_equal() +
+    ggplot2::labs(
+      x = nm[i], y = nm[j], colour = NULL, title = x$type,
+      subtitle = sprintf(
+        "D = %s, p = %s  -  %.0f%% compatibility ellipse (kappa = %s)",
+        format(x$statistic, digits = 3),
+        format(x$p_value, digits = 3),
+        100 * (1 - x$alpha),
+        format(geo$kappa, digits = 3))) +
+    ggplot2::theme_minimal()
+}

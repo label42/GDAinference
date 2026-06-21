@@ -17,7 +17,7 @@ The package provides the three multidimensional tests of the book:
 | Test | Question | Status |
 |------|----------|--------|
 | **Combinatorial typicality** (ch. 3) | Is a group's mean point atypical of a reference cloud? | ✅ implemented |
-| **Geometric typicality** (ch. 4) | Does a cloud's mean point deviate from a reference point? | 🚧 planned |
+| **Geometric typicality** (ch. 4) | Does a cloud's mean point deviate from a reference point? | ✅ implemented |
 | **Homogeneity** (ch. 5) | Do two independent groups' mean points differ? | 🚧 planned |
 
 Each test returns a combinatorial p-value (from the distribution of a
@@ -93,6 +93,16 @@ typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
 # Test a single group and visualise its 95% compatibility region:
 res <- typicality_comb(mca, group = "occup", level = "Etudiant, eleve", axes = 1:2)
 plot(res)
+```
+
+A second test, **geometric typicality** (ch. 4), asks instead whether a cloud's
+mean point coincides with a fixed *reference point* (e.g. the origin), using a
+sign-flip permutation and the cloud's own covariance:
+
+```r
+# Are the students located at the cloud's origin, or genuinely displaced?
+typicality_geom(mca, group = "occup", level = "Etudiant, eleve",
+                point = 0, axes = 1:2)
 ```
 
 The same calls work on a GDAtools `speMCA` / `csMCA` or an ade4 `dudi.pca` /

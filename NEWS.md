@@ -7,6 +7,13 @@
   (Le Roux, Bienaise & Durand 2019, ch. 3), with `print()`/`summary()` methods
   and a 95% compatibility ellipsoid. Reproduces the book's "Target" example
   (D = 0.964, p = 9/210).
+* `typicality_geom()`: geometric (sign-flip) typicality test for a mean point
+  against a reference point (Le Roux, Bienaise & Durand 2019, ch. 4), with
+  `print()` and `plot()` methods. Handles the multidimensional case (κ-ellipse
+  compatibility region), the one-dimensional case (one-sided p-value and exact
+  compatibility interval) and optional restriction to a subgroup. Reproduces the
+  book's Target example (D = 0.964, p = 86/1024, κ ≈ 1.08) and Student example
+  (one-sided p = 1/512, interval [0.833, 2.467]).
 * `plot()` method for typicality results: the cloud, its centre, the group mean
   and the compatibility ellipse, drawn with ggplot2.
 * `typicality_comb()` gains a `level` argument, so a group can be named as a
