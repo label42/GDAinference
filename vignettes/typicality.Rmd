@@ -86,11 +86,17 @@ map <- rbind(
 ggplot(map, aes(D1, D2, colour = type, label = label)) +
   geom_hline(yintercept = 0, colour = "grey85") +
   geom_vline(xintercept = 0, colour = "grey85") +
-  geom_point() +
-  geom_text(size = 3, vjust = -0.6, show.legend = FALSE) +
+  geom_point(size = 1.6) +
+  # thin out the leisure labels, but always show the (few) occupation labels
+  geom_text(data = subset(map, type == "leisure category"),
+            size = 2.8, vjust = -0.7, check_overlap = TRUE, show.legend = FALSE) +
+  geom_text(data = subset(map, type == "occupation"),
+            size = 3, fontface = "bold", vjust = -0.8, show.legend = FALSE) +
   scale_colour_manual(values = c("leisure category" = "grey45",
                                  "occupation" = "#D95F02")) +
-  coord_equal() + theme_minimal() +
+  scale_x_continuous(expand = expansion(mult = 0.18)) +
+  scale_y_continuous(expand = expansion(mult = 0.08)) +
+  coord_equal(clip = "off") + theme_minimal() +
   labs(x = "Axis 1 (volume of practices)",
        y = "Axis 2 (outdoor vs. urban-cultural)", colour = NULL)
 ```
