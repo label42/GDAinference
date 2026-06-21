@@ -61,22 +61,44 @@ remotes::install_github("label42/GDA_combinatorial_inference")
 
 ## Example
 
+Run your GDA, then ask whether a group is atypical of the cloud:
+
 ```r
 library(GDAinference)
+library(FactoMineR)
+data(hdv2003, package = "questionr")   # 2000 respondents, French "Histoire de vie" survey
 
-# The "Target" example from Le Roux et al. (2019), ch. 3:
-# a group of 4 points compared with a reference cloud of 10 points.
-res <- typicality_comb(Target, Target_group)
-res
-#> Combinatorial typicality test (mean point)
-#> ...
-#> Mahalanobis distance D = 0.9636 (D^2 = 0.9286) -- notable deviation
-#> p-value : 9 / 210 = 0.04286
+# A standard MCA of seven leisure practices, with activity status (occup)
+# added as a supplementary variable -- the usual GDA workflow:
+vars <- c("hard.rock", "lecture.bd", "peche.chasse", "cuisine",
+          "bricol", "cinema", "sport")
+mca <- MCA(hdv2003[, c(vars, "occup")], quali.sup = 8, graph = FALSE)
 
-# Straight from a FactoMineR / GDAtools / ade4 analysis:
-# res_mca <- FactoMineR::MCA(my_data, graph = FALSE, ncp = Inf)
-# typicality_comb(res_mca, group = my_data$category == "level", axes = 1:3)
+# Is the mean point of each activity-status group atypical? (first plane)
+typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
+#> Combinatorial typicality test by category of 'occup'
+#> Cloud: n = 2000 individuals, dimensionality L = 2
+#>
+#>               category  n_c     D p_value sig notable
+#>  Exerce une profession 1049 0.279   0.000   *      no   # significant, but D < 0.4 (large n)
+#>                Chomeur  134 0.129   0.305          no   # compatible with the whole cloud
+#>        Etudiant, eleve   94 0.973   0.000   *     yes   # strongly atypical
+#>               Retraite  392 0.537   0.000   *     yes
+#>    Retire des affaires   77 0.679   0.000   *     yes
+#>               Au foyer  171 0.388   0.000   *      no
+#>          Autre inactif   83 0.762   0.000   *     yes
+#>
+#> * p <= 0.05   |   'notable': D >= 0.4   |   montecarlo
+
+# Test a single group and visualise its 95% compatibility region:
+res <- typicality_comb(mca, group = "occup", level = "Etudiant, eleve", axes = 1:2)
+plot(res)
 ```
+
+The same calls work on a GDAtools `speMCA` / `csMCA` or an ade4 `dudi.pca` /
+`dudi.acm` object — just pass it instead. See
+`vignette("typicality", "GDAinference")` for the full walk-through and how to
+read the results (notably, *significant* vs. *notable*).
 
 ## Credit
 
