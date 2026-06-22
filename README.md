@@ -1,4 +1,4 @@
-# GDAinference
+# GDAinference <img src="man/figures/logo.png" align="right" height="139" alt="GDAinference hex logo" />
 
 <!-- badges: start -->
 <!-- badges: end -->

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 600" width="520" height="600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3187be"/>
+      <stop offset="1" stop-color="#1c597f"/>
+    </linearGradient>
+    <clipPath id="hex">
+      <path d="M260,10 L511,155 L511,445 L260,590 L9,445 L9,155 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- hex background -->
+  <g clip-path="url(#hex)">
+    <rect x="0" y="0" width="520" height="600" fill="url(#bg)"/>
+
+    <!-- principal axes -->
+    <g stroke="#ffffff" stroke-opacity="0.18" stroke-width="2">
+      <line x1="100" y1="306" x2="420" y2="190"/>
+      <line x1="222" y1="124" x2="298" y2="372"/>
+    </g>
+
+    <!-- concentration / compatibility ellipse -->
+    <ellipse cx="260" cy="248" rx="150" ry="92"
+             transform="rotate(-20 260 248)"
+             fill="#ffffff" fill-opacity="0.06"
+             stroke="#ffffff" stroke-opacity="0.85" stroke-width="3.5"
+             stroke-dasharray="11 9"/>
+
+    <!-- cloud of points -->
+    <g fill="#e6f0f8" fill-opacity="0.93">
+      <circle cx="122" cy="309" r="9"/>
+      <circle cx="143" cy="248" r="9"/>
+      <circle cx="210" cy="314" r="9"/>
+      <circle cx="204" cy="210" r="9"/>
+      <circle cx="270" cy="276" r="9"/>
+      <circle cx="248" cy="215" r="9"/>
+      <circle cx="316" cy="286" r="9"/>
+      <circle cx="292" cy="204" r="9"/>
+      <circle cx="351" cy="236" r="9"/>
+      <circle cx="355" cy="187" r="9"/>
+      <circle cx="403" cy="201" r="9"/>
+      <circle cx="305" cy="168" r="9"/>
+      <circle cx="252" cy="315" r="9"/>
+    </g>
+
+    <!-- mean point -->
+    <circle cx="263" cy="246" r="15" fill="#ff8c1a" stroke="#ffffff" stroke-width="3"/>
+  </g>
+
+  <!-- package name -->
+  <text x="260" y="452" text-anchor="middle"
+        font-family="'Source Sans Pro','Segoe UI',Arial,sans-serif"
+        font-size="61" font-weight="700" fill="#ffffff">GDAinference</text>
+
+  <!-- hex border -->
+  <path d="M260,10 L511,155 L511,445 L260,590 L9,445 L9,155 Z"
+        fill="none" stroke="#ffffff" stroke-width="11"/>
+</svg>
