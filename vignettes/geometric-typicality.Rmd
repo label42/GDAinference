@@ -1,14 +1,14 @@
 ---
-title: "Geometric typicality: testing repeated-measures effects"
+title: "Geometric typicality: testing an effect in a principal plane"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Geometric typicality: testing repeated-measures effects}
+  %\VignetteIndexEntry{Geometric typicality: testing an effect in a principal plane}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
-needed <- c("carData", "ggplot2")
+needed <- c("carData", "FactoMineR", "ggplot2")
 ok <- all(vapply(needed, requireNamespace, logical(1), quietly = TRUE))
 knitr::opts_chunk$set(
   collapse = TRUE, comment = "#>", eval = ok,
@@ -16,76 +16,84 @@ knitr::opts_chunk$set(
 )
 ```
 
-## The repeated-measures problem
+## The question
 
-A classic design measures each unit **twice** -- before and after a treatment,
-or under two conditions. For every subject $i$ we then have an *effect*: the
-deviation between the two measurements. The question is whether the **mean
-effect** is a genuine one, or could just be the luck of the signs:
+When the same individuals are observed in two conditions -- *before* and *after*
+a treatment -- each one carries an **effect**: the deviation from its "before"
+point to its "after" point. If the observations are multidimensional these
+effects are *vectors*, and they live in the geometric space of a GDA. The
+natural question is whether the **mean effect-vector** is a genuine one, or could
+just be the luck of the draw.
 
-> If the treatment did nothing, each subject's effect would be just as likely to
-> point one way as the other. So we can build a reference distribution by
-> flipping the sign of each subject's effect in every possible way, and ask how
-> extreme the observed mean effect is.
+This is the situation the **geometric typicality test** is made for (Le Roux,
+Bienaise & Durand 2019, ch. 4; their Parkinson case study, §6.1). The reasoning
+is a *reflection* argument:
 
-This is exactly the **geometric typicality test** of Le Roux, Bienaise & Durand
-(2019, ch. 4): `typicality_geom()` compares the mean point of a cloud (here, the
-cloud of individual effects) to a fixed **reference point** (here the origin
-`0` = "no effect"), using the cloud's own covariance and the
-$2^{n-1}$ sign-flips. It returns a p-value and a **compatibility region**.
+> If the treatment did nothing, the "before" and "after" measurements of a
+> subject would be interchangeable -- so each subject's effect-vector would be
+> just as likely to point one way as the opposite. Flipping the sign of each
+> effect-vector in every possible way builds the reference distribution, and we
+> ask how far the observed mean effect is from the **null point** $O$ ("no
+> effect").
+
+`typicality_geom()` does this, in the principal plane of a GDA, returning a
+p-value and a compatibility region.
 
 ```{r load}
 library(GDAinference)
+library(FactoMineR)
 library(ggplot2)
 ```
 
-## One measurement: Student's sleep data
+## Building the cloud: a GDA of the response profiles
 
-The historical example is Student's (1908) sleep experiment, shipped with R as
-`datasets::sleep`: ten patients each received two soporific drugs, and the
-variable `extra` records the extra hours of sleep. The *effect* for each patient
-is the difference between the two drugs.
+We use the O'Brien--Kaiser repeated-measures data (`carData`): 16 subjects in a
+`control` group and two treatment groups (`A`, `B`), each measured on five
+successive occasions, **before** and **after** the intervention.
 
-```{r sleep}
-effect <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
-effect
-typicality_geom(matrix(effect, ncol = 1), point = 0)
+The five occasions form a *response profile*. We summarise these profiles by a
+PCA -- pooling the before and after profiles so that both are placed in the same
+space:
+
+```{r pca}
+data("OBrienKaiser", package = "carData")
+pre  <- as.matrix(OBrienKaiser[, paste0("pre.",  1:5)])
+post <- as.matrix(OBrienKaiser[, paste0("post.", 1:5)])
+
+pca <- PCA(rbind(pre, post), scale.unit = TRUE, ncp = 5, graph = FALSE)
+round(pca$eig[1:3, "percentage of variance"], 1)
+round(pca$var$coord[, 1:2], 2)
 ```
 
-Because there is a single measurement, the test is **one-dimensional** and
-one-sided. Nine of the ten effects are positive (one is null), so the observed
-mean is essentially the most extreme of the $2^9$ sign-flips: the p-value is
-$1/2^9 \approx 0.002$, far below 0.05. The mean effect is **atypical** of zero --
-drug 2 is genuinely superior. Equivalently, the 95% compatibility interval
-$[0.83,\, 2.47]$ does not contain 0.
+The first plane is easy to read. **Axis 1** (80% of the variance) has all five
+loadings positive: it is an *overall response level* (high on every occasion vs.
+low on every occasion). **Axis 2** opposes the early occasions to the late ones:
+it is a *within-session shape*. Each subject now has a "before" point and an
+"after" point in this plane.
 
-(These ten effects are also shipped as the `Student` data set; the numbers
-reproduce the book's §4.4.1 example exactly.)
+## Effect-vectors
 
-## Several measurements: a two-dimensional effect
+The effect of the intervention for each subject is the vector from its "before"
+point to its "after" point -- a difference of principal coordinates:
 
-When **several** variables are measured before and after, the effect of each
-subject is a *point*, and the test works in the corresponding space. We use
-`carData::WeightLoss`: 34 people in three groups (`Control`, `Diet`,
-`DietEx` = diet + exercise), with weekly **weight loss** and **self-esteem**
-recorded at weeks 1, 2 and 3. For each subject we take the change from week 1 to
-week 3 on *both* variables:
-
-```{r weightloss-data}
-data("WeightLoss", package = "carData")
-change <- with(WeightLoss, cbind(
-  "weight-loss change" = wl3 - wl1,
-  "self-esteem change" = se3 - se1
-))
-head(change)
+```{r effects}
+co <- get_coord(pca)
+effect <- co[17:32, 1:2] - co[1:16, 1:2]      # post - pre, in the first plane
+colnames(effect) <- c("axis 1: overall level", "axis 2: shape")
+head(round(effect, 2))
 ```
 
-Is the mean change point of each group different from "no change" = $(0, 0)$?
+These 16 effect-vectors form a cloud. Under "no effect", each one is equally
+likely to point either way (the reflection argument above), so the geometric
+typicality test sign-flips them and asks whether their **mean** is displaced from
+$O = (0, 0)$.
 
-```{r weightloss-test}
-groups <- levels(WeightLoss$group)
-do.call(rbind, lapply(groups, function(g) {
-  res <- typicality_geom(change[WeightLoss$group == g, ], point = c(0, 0), seed = 1)
+## The test
+
+```{r by-group}
+treatment <- OBrienKaiser$treatment
+do.call(rbind, lapply(levels(treatment), function(g) {
+  res <- typicality_geom(effect[treatment == g, ], point = c(0, 0), seed = 1)
   data.frame(group = g, n = res$n,
              D = round(res$statistic, 2),
              p_value = round(res$p_value, 4),
@@ -93,65 +101,62 @@ do.call(rbind, lapply(groups, function(g) {
 }))
 ```
 
-Every group shows a notable, significant change, of increasing magnitude from
-`Control` to `DietEx`. The `plot()` method shows *how* a group moved -- here the
-control group:
+The contrast is clear -- with the caveat that group `A` (n = 4) is far too small
+for the test to reach significance (with only $2^{3}$ sign-flips the smallest
+attainable p-value is large). Pooling the two treatment groups gives adequate
+size:
 
-```{r weightloss-plot, fig.alt = "Compatibility ellipse for the control group's mean change vector."}
-res_ctrl <- typicality_geom(change[WeightLoss$group == "Control", ],
-                            point = c(0, 0), seed = 1)
-plot(res_ctrl)
+```{r treated}
+res_control <- typicality_geom(effect[treatment == "control", ], point = c(0, 0))
+res_treated <- typicality_geom(effect[treatment %in% c("A", "B"), ],
+                               point = c(0, 0), seed = 1)
+res_treated
 ```
 
-The cloud of individual change-points has its mean **G** displaced to the
-*left* of the reference point **P** = $(0,0)$: the controls' weekly weight loss
-slowed down (a natural tapering), while their self-esteem barely moved
-vertically. **P** lies outside the dashed compatibility ellipse, so the change
-is atypical -- but the displacement is almost entirely along one axis.
+* The **control** group's mean effect is essentially at $O$ (`D = 0.15`,
+  `p = 1`): its before/after measurements are interchangeable -- exactly what
+  "no effect" should look like.
+* The **treated** group's mean effect is notable and atypical (`D = 2.07`,
+  `p = 0.002`): the intervention produced a genuine shift.
 
-### Reading the dimensions
+The `plot()` shows *where* the treated group moved:
 
-A multidimensional test can be significant for different reasons in different
-groups. Testing each axis on its own makes this explicit:
-
-```{r weightloss-axes}
-per_axis <- function(g) {
-  m <- change[WeightLoss$group == g, ]
-  c(weight_loss = typicality_geom(m[, 1, drop = FALSE], point = 0)$p_value,
-    self_esteem = typicality_geom(m[, 2, drop = FALSE], point = 0)$p_value)
-}
-round(t(sapply(groups, per_axis)), 4)
+```{r plot, fig.alt = "Effect-vectors of the treated group with the 95% compatibility ellipse; the null point O lies outside it."}
+plot(res_treated)
 ```
 
-The picture is now clear: **everyone's weekly weight loss slowed** (all atypical
-on axis 1), but **self-esteem rose only under the active regimes** -- the control
-group's self-esteem change is *compatible* with zero ($p \approx 0.36$), whereas
-`Diet` and `DietEx` are atypical. The two-dimensional test captures the joint
-effect; the per-axis view shows which dimension carries it.
+The cloud of effect-vectors has its mean **G** well to the right of the null
+point **P** = $O$, along **axis 1**: after treatment, responses rose to a higher
+*overall level*, with little change of *shape* (axis 2). Because **P** lies
+outside the dashed compatibility ellipse, the mean effect is significant at the
+5% level. Had the effect been null -- as for the control group -- $O$ would have
+fallen inside the region.
 
-## Using it inside a GDA
+## Why *geometric* typicality here?
 
-The same test answers a common GDA question: **is a subgroup's mean point at the
-origin of the cloud?** Pass a `FactoMineR`/`GDAtools`/`ade4` result and
-`point = 0` (the cloud's centre), optionally restricting to a category:
+It is worth contrasting the two typicality tests of the package on this example:
 
-```{r gda, eval = FALSE}
-res_mca <- FactoMineR::MCA(my_data, graph = FALSE)
-typicality_geom(res_mca, group = my_data$category, level = "X", point = 0, axes = 1:2)
-```
+* [typicality_comb()] (combinatorial, ch. 3) treats a group as a *sample* of a
+  reference population and permutes which individuals belong to it. That is the
+  right test for "is this subgroup atypical of the whole cloud?" (see the
+  `vignette("typicality")`).
+* `typicality_geom()` (geometric, ch. 4) treats the effect-vectors as a cloud in
+  their own right and tests its mean against a fixed *point*. There is no
+  reference population to sample from here -- only a within-subject reflection
+  symmetry -- so this is the appropriate test.
 
 ## Practical notes
 
-* **Exact vs. Monte Carlo.** With up to ~17 subjects the $2^{n-1}$ sign-flips are
-  enumerated exactly; beyond that, `max_samples` of them are drawn at random (set
-  `seed` for reproducibility).
-* **One vs. several dimensions.** In 1-D the p-value is one-sided and the
-  compatibility region is an exact interval; in higher dimensions it is a
-  $\kappa$-ellipse adjusted from random directions (`n_dir`).
-* **Reference point.** `point` defaults to the origin (`0`); pass any point to
-  test a different null.
+* **Exact vs. Monte Carlo.** Up to ~17 subjects the $2^{n-1}$ sign-flips are
+  enumerated exactly; beyond that, `max_samples` of them are drawn at random
+  (set `seed`).
+* **The principal plane.** The test is run on the axes you pass (`axes`); read it
+  on the plane you interpret, as in any GDA.
+* **The reference point.** `point` defaults to the origin (`0` = "no effect");
+  pass any point to test a different null.
 
 ## Reference
 
 Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
-*Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
+*Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC
+(the Parkinson study, §6.1).

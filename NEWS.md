@@ -26,11 +26,12 @@
   worked example on `questionr::hdv2003` (FactoMineR MCA), with cloud
   interpretation, plots and guidance on reading the tests (notably the
   distinction between a *significant* and a *notable* deviation).
-* Tutorial vignette "Geometric typicality: testing repeated-measures effects" —
-  a worked example on real before/after data (`datasets::sleep` for the
-  one-dimensional case, `carData::WeightLoss` for a two-dimensional effect),
-  covering the compatibility interval, the kappa-ellipse, and how a
-  multidimensional test relates to its per-axis views.
+* Tutorial vignette "Geometric typicality: testing an effect in a principal
+  plane" — a worked GDA example after the book's Parkinson study (§6.1): a PCA
+  of the O'Brien–Kaiser repeated-measures response profiles, then the geometric
+  typicality test on the before→after effect-vectors in the first principal
+  plane, contrasting a treated group (atypical effect) with a control group
+  (compatible with no effect).
 * Compatibility documented and backed by integration tests: formally tested on
   FactoMineR (`PCA`, `MCA`), GDAtools (`speMCA`, `csMCA`) and ade4 (`dudi.pca`,
   `dudi.acm`); other similarly-structured GDA objects are expected to work but
