@@ -1,0 +1,62 @@
+url: https://label42.github.io/GDAinference/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#2C7FB8"
+
+home:
+  title: Combinatorial Inference in Geometric Data Analysis
+  description: >
+    Exact combinatorial (permutation) inference tests for Geometric Data
+    Analysis, working natively with FactoMineR, GDAtools and ade4.
+
+navbar:
+  structure:
+    left:  [reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: Typicality tests
+  desc: >
+    Exact combinatorial inference tests for the typicality of a mean point in a
+    geometric (GDA) cloud (Le Roux, Bienaise & Durand 2019, chapters 3–4).
+  contents:
+  - typicality_comb
+  - typicality_byvar
+  - typicality_geom
+- title: Compatibility with GDA packages
+  desc: >
+    Extract principal coordinates from the result objects of the common GDA
+    packages, so the tests work whatever the upstream tool.
+  contents:
+  - get_coord
+- title: Methods
+  desc: Print and plot methods for the test results.
+  contents:
+  - print.gdainference_test
+  - print.typicality_byvar
+  - print.typicality_geom
+  - plot.typicality_comb
+  - plot.typicality_geom
+- title: Data sets
+  desc: Didactic data from Le Roux, Bienaise & Durand (2019).
+  contents:
+  - Target
+  - Target_group
+  - Student
+- title: Package
+  contents:
+  - GDAinference-package
+
+articles:
+- title: Tutorials
+  navbar: ~
+  contents:
+  - typicality
+  - geometric-typicality
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

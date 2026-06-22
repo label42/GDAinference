@@ -56,7 +56,7 @@ can extract the principal coordinates yourself and pass them as a matrix.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("label42/GDA_combinatorial_inference")
+remotes::install_github("label42/GDAinference")
 ```
 
 ## Example

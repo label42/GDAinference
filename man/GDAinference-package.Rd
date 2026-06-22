@@ -11,8 +11,9 @@ Exact combinatorial (permutation) inference tests for Geometric Data Analysis (G
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/label42/GDA_combinatorial_inference}
-  \item Report bugs at \url{https://github.com/label42/GDA_combinatorial_inference/issues}
+  \item \url{https://label42.github.io/GDAinference/}
+  \item \url{https://github.com/label42/GDAinference}
+  \item Report bugs at \url{https://github.com/label42/GDAinference/issues}
 }
 
 }

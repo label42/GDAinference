@@ -22,6 +22,6 @@ bibentry(
   author   = person("Abel", "Aussant"),
   year     = format(Sys.Date(), "%Y"),
   note     = "R package implementing the tests of Le Roux, Bienaise & Durand (2019)",
-  url      = "https://github.com/label42/GDA_combinatorial_inference",
+  url      = "https://github.com/label42/GDAinference",
   key      = "GDAinference-pkg"
 )

@@ -35,6 +35,7 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
-URL: https://github.com/label42/GDA_combinatorial_inference
-BugReports: https://github.com/label42/GDA_combinatorial_inference/issues
+URL: https://label42.github.io/GDAinference/,
+    https://github.com/label42/GDAinference
+BugReports: https://github.com/label42/GDAinference/issues
 Config/roxygen2/version: 8.0.0
