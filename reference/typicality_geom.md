@@ -140,7 +140,7 @@ res                       # D = 0.964, p = 86/1024 = 0.084 (compatible)
 #> Test statistic d2_obs  = 0.4815
 #> Distribution    : exact (exhaustive enumeration), 512 samples
 #> p-value         : 86 / 1,024 = 0.08398
-#> 95% compatibility : principal kappa-ellipsoid, kappa = 1.086
+#> 95% compatibility : principal kappa-ellipsoid, kappa = 1.085
 
 # One-dimensional Student example: mean sleep gain vs 0 (no effect).
 typicality_geom(Student, point = 0)

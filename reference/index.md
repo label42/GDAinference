@@ -13,6 +13,14 @@ in a geometric (GDA) cloud (Le Roux, Bienaise & Durand 2019, chapters
 - [`typicality_geom()`](https://label42.github.io/GDAinference/reference/typicality_geom.md)
   : Geometric typicality test for a mean point
 
+## Homogeneity test
+
+Exact combinatorial test of the homogeneity of two groups in a geometric
+(GDA) cloud (Le Roux, Bienaise & Durand 2019, chapter 5).
+
+- [`homogeneity()`](https://label42.github.io/GDAinference/reference/homogeneity.md)
+  : Combinatorial homogeneity test
+
 ## Compatibility with GDA packages
 
 Extract principal coordinates from the result objects of the common GDA
@@ -32,10 +40,14 @@ Print and plot methods for the test results.
   : Print a by-category typicality table
 - [`print(`*`<typicality_geom>`*`)`](https://label42.github.io/GDAinference/reference/print.typicality_geom.md)
   : Print a geometric typicality test
+- [`print(`*`<homogeneity>`*`)`](https://label42.github.io/GDAinference/reference/print.homogeneity.md)
+  : Print a combinatorial homogeneity test
 - [`plot(`*`<typicality_comb>`*`)`](https://label42.github.io/GDAinference/reference/plot.typicality_comb.md)
   : Plot a combinatorial typicality test
 - [`plot(`*`<typicality_geom>`*`)`](https://label42.github.io/GDAinference/reference/plot.typicality_geom.md)
   : Plot a geometric typicality test
+- [`plot(`*`<homogeneity>`*`)`](https://label42.github.io/GDAinference/reference/plot.homogeneity.md)
+  : Plot a combinatorial homogeneity test
 
 ## Data sets
 

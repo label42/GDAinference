@@ -99,7 +99,7 @@
 <td>
 <strong>Homogeneity</strong> (ch. 5)</td>
 <td>Do two independent groups’ mean points differ?</td>
-<td>🚧 planned</td>
+<td>✅ implemented</td>
 </tr>
 </tbody>
 </table>
@@ -192,6 +192,18 @@
 <code class="sourceCode R"><span><span class="co"># Are the students located at the cloud's origin, or genuinely displaced?</span></span>
 <span><span class="fu"><a href="reference/typicality_geom.html">typicality_geom</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, level <span class="op">=</span> <span class="st">"Etudiant, eleve"</span>,</span>
 <span>                point <span class="op">=</span> <span class="fl">0</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>The third test, <strong>homogeneity</strong> (ch. 5), compares the mean points of <strong>two or more groups</strong>: do they differ? Either <em>within</em> the whole cloud (<code>comparison = "partial"</code>, the default) or by restricting the cloud to the groups (<code>comparison = "specific"</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Do students and the retired occupy different positions in the first plane?</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>,</span>
+<span>                   groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Etudiant, eleve"</span>, <span class="st">"Retraite"</span><span class="op">)</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>   <span class="co"># the deviation Gc2 - Gc1 against its 95% compatibility region</span></span>
+<span></span>
+<span><span class="co"># Omit `groups` to test all categories at once (global omnibus): are the</span></span>
+<span><span class="co"># activity-status groups heterogeneous overall?</span></span>
+<span><span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>With two groups the statistic is the Mahalanobis distance between the mean points (with a compatibility region); with more than two it is the between-group Mahalanobis variance (an omnibus test).</p>
 <p>The same calls work on a GDAtools <code>speMCA</code> / <code>csMCA</code> or an ade4 <code>dudi.pca</code> / <code>dudi.acm</code> object — just pass it instead. See <code><a href="articles/typicality.html">vignette("typicality", "GDAinference")</a></code> for the full walk-through and how to read the results (notably, <em>significant</em> vs. <em>notable</em>).</p>
 </div>
 <div class="section level2">

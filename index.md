@@ -16,7 +16,7 @@ The package provides the three multidimensional tests of the book:
 |----|----|----|
 | **Combinatorial typicality** (ch. 3) | Is a group’s mean point atypical of a reference cloud? | ✅ implemented |
 | **Geometric typicality** (ch. 4) | Does a cloud’s mean point deviate from a reference point? | ✅ implemented |
-| **Homogeneity** (ch. 5) | Do two independent groups’ mean points differ? | 🚧 planned |
+| **Homogeneity** (ch. 5) | Do two independent groups’ mean points differ? | ✅ implemented |
 
 Each test returns a combinatorial p-value (from the distribution of a
 Mahalanobis-type statistic) together with a **compatibility region**.
@@ -107,6 +107,28 @@ origin), using a sign-flip permutation and the cloud’s own covariance:
 typicality_geom(mca, group = "occup", level = "Etudiant, eleve",
                 point = 0, axes = 1:2)
 ```
+
+The third test, **homogeneity** (ch. 5), compares the mean points of
+**two or more groups**: do they differ? Either *within* the whole cloud
+(`comparison = "partial"`, the default) or by restricting the cloud to
+the groups (`comparison = "specific"`):
+
+``` r
+
+# Do students and the retired occupy different positions in the first plane?
+res <- homogeneity(mca, group = "occup",
+                   groups = c("Etudiant, eleve", "Retraite"), axes = 1:2)
+res
+plot(res)   # the deviation Gc2 - Gc1 against its 95% compatibility region
+
+# Omit `groups` to test all categories at once (global omnibus): are the
+# activity-status groups heterogeneous overall?
+homogeneity(mca, group = "occup", axes = 1:2)
+```
+
+With two groups the statistic is the Mahalanobis distance between the
+mean points (with a compatibility region); with more than two it is the
+between-group Mahalanobis variance (an omnibus test).
 
 The same calls work on a GDAtools `speMCA` / `csMCA` or an ade4
 `dudi.pca` / `dudi.acm` object — just pass it instead. See
