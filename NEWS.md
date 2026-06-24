@@ -46,6 +46,12 @@
   typicality test on the before→after effect-vectors in the first principal
   plane, contrasting a treated group (atypical effect) with a control group
   (compatible with no effect).
+* Tutorial vignette "Homogeneity: do two groups differ in a GDA cloud?" — a
+  worked example on `questionr::hdv2003` (FactoMineR MCA) comparing
+  activity-status groups: two-group tests with the deviation/compatibility-region
+  plot, the *significant* vs *notable* reading, the partial-vs-specific
+  distinction, and the multi-group omnibus — contrasted throughout with the
+  typicality test.
 * Compatibility documented and backed by integration tests: formally tested on
   FactoMineR (`PCA`, `MCA`), GDAtools (`speMCA`, `csMCA`) and ade4 (`dudi.pca`,
   `dudi.acm`); other similarly-structured GDA objects are expected to work but

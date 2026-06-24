@@ -216,7 +216,7 @@ homogeneity <- function(x, group, groups = NULL,
       type = if (twoGroup) "Combinatorial homogeneity test (two groups)"
              else sprintf("Combinatorial homogeneity test (%d groups)", Cp),
       comparison = comparison,
-      global = identical(n - nprim, 0L),
+      global = comparison == "partial" && (n - nprim) == 0L,
       n_groups = Cp,
       groups = groups,
       sizes = stats::setNames(sizes, groups),
