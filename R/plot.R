@@ -1,5 +1,5 @@
 # Column names used inside ggplot2::aes(); declared to satisfy R CMD check.
-utils::globalVariables(c("px", "py", "plabel"))
+utils::globalVariables(c("px", "py", "plabel", "xend", "yend"))
 
 #' Plot a combinatorial typicality test
 #'
@@ -198,5 +198,113 @@ plot.typicality_geom <- function(x, axes = c(1, 2), ...) {
         format(x$p_value, digits = 3),
         100 * (1 - x$alpha),
         format(geo$kappa, digits = 3))) +
+    ggplot2::theme_minimal()
+}
+
+#' Plot a combinatorial homogeneity test
+#'
+#' Displays the **space of deviations** (Le Roux, Bienaise & Durand 2019,
+#' Fig. 5.14): the null deviation O (origin, "no difference"), the observed
+#' deviation \eqn{D_{obs} = G_{c_2} - G_{c_1}} between the two group mean points,
+#' and the \eqn{(1-\alpha)} compatibility region: the principal
+#' \eqn{\kappa}-ellipse of the reference cloud, centred on \eqn{D_{obs}}. When O
+#' falls outside the ellipse, the two groups are heterogeneous at level
+#' \eqn{\alpha}.
+#'
+#' Requires the \pkg{ggplot2} package and a two- (or more) dimensional analysis.
+#'
+#' @param x A `homogeneity` object created with `keep_geometry = TRUE` (the
+#'   default of [homogeneity()]).
+#' @param axes Length-2 integer vector giving the two axes to display.
+#'   Default `c(1, 2)`.
+#' @param ... Currently ignored.
+#'
+#' @return A \pkg{ggplot2} object (drawn when printed).
+#'
+#' @seealso [homogeneity()]
+#'
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' grp <- c(1, 1, 3, 3, 3, 1, 3, 3, 2, 2)
+#' plot(homogeneity(Target, grp, groups = c(1, 2)))
+#' @export
+plot.homogeneity <- function(x, axes = c(1, 2), ...) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required for plotting; install it, or use ",
+         "print() for a text summary.", call. = FALSE)
+  }
+  geo <- x$geometry
+  if (is.null(geo)) {
+    stop("No stored geometry to plot. Re-run homogeneity() with ",
+         "keep_geometry = TRUE.", call. = FALSE)
+  }
+  if (x$dim < 2L) {
+    stop("Plotting requires at least 2 dimensions; this analysis is ",
+         "one-dimensional (see the compatibility interval in print()).",
+         call. = FALSE)
+  }
+  comp <- x$compatibility
+  if (!identical(comp$type, "ellipsoid") || is.na(comp$kappa)) {
+    stop("No finite compatibility region to plot for this result",
+         if (!is.null(comp$message)) paste0(" (", comp$message, ")") else "",
+         ".", call. = FALSE)
+  }
+  if (length(axes) != 2L || anyNA(axes)) {
+    stop("`axes` must be a length-2 vector of axis indices.", call. = FALSE)
+  }
+  ref <- geo$ref_cloud
+  i <- axes[1L]
+  j <- axes[2L]
+  if (max(i, j) > ncol(ref) || min(i, j) < 1L) {
+    stop("`axes` must lie between 1 and ", ncol(ref),
+         " (the number of analysed axes).", call. = FALSE)
+  }
+
+  nm <- geo$axis_names
+  if (is.null(nm)) nm <- paste0("Axis ", seq_len(ncol(ref)))
+
+  # Principal ellipse of the reference cloud on this plane, scaled by kappa,
+  # centred on the observed deviation point Dobs = Gc2 - Gc1.
+  ref2 <- ref[, c(i, j), drop = FALSE]
+  S <- crossprod(sweep(ref2, 2, colMeans(ref2), "-")) / nrow(ref2)
+  e <- eigen(S, symmetric = TRUE)
+  th <- seq(0, 2 * pi, length.out = 200L)
+  ell <- e$vectors %*% diag(sqrt(pmax(e$values, 0)), 2L) %*%
+    rbind(cos(th), sin(th)) * comp$kappa
+  Dobs <- (geo$Gc2 - geo$Gc1)[c(i, j)]
+
+  df_ell <- data.frame(px = Dobs[1L] + ell[1L, ], py = Dobs[2L] + ell[2L, ])
+  df_seg <- data.frame(px = 0, py = 0, xend = Dobs[1L], yend = Dobs[2L])
+  df_key <- data.frame(
+    px = c(0, Dobs[1L]), py = c(0, Dobs[2L]),
+    plabel = c("O (no difference)", "Gc2 - Gc1 (observed)")
+  )
+
+  ggplot2::ggplot() +
+    ggplot2::geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey85") +
+    ggplot2::geom_vline(xintercept = 0, linewidth = 0.3, colour = "grey85") +
+    ggplot2::geom_path(
+      data = df_ell, ggplot2::aes(x = px, y = py),
+      linetype = "dashed", colour = "grey30") +
+    ggplot2::geom_segment(
+      data = df_seg,
+      ggplot2::aes(x = px, y = py, xend = xend, yend = yend),
+      colour = "grey55", linewidth = 0.4) +
+    ggplot2::geom_point(
+      data = df_key, ggplot2::aes(x = px, y = py, colour = plabel), size = 3.5) +
+    ggplot2::scale_colour_manual(
+      values = c("O (no difference)" = "black",
+                 "Gc2 - Gc1 (observed)" = "#D95F02")) +
+    ggplot2::coord_equal() +
+    ggplot2::labs(
+      x = sprintf("deviation on %s", nm[i]),
+      y = sprintf("deviation on %s", nm[j]),
+      colour = NULL, title = x$type,
+      subtitle = sprintf(
+        "D = %s, p = %s  -  O is %s the %.0f%% region (kappa = %s)",
+        format(x$statistic, digits = 3),
+        format(x$p_value, digits = 3),
+        if (isTRUE(x$p_value > x$alpha)) "inside" else "outside",
+        100 * (1 - x$alpha),
+        format(comp$kappa, digits = 3))) +
     ggplot2::theme_minimal()
 }

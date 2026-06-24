@@ -14,8 +14,22 @@
   compatibility interval) and optional restriction to a subgroup. Reproduces the
   book's Target example (D = 0.964, p = 86/1024, κ ≈ 1.08) and Student example
   (one-sided p = 1/512, interval [0.833, 2.467]).
-* `plot()` method for typicality results: the cloud, its centre, the group mean
-  and the compatibility ellipse, drawn with ggplot2.
+* `homogeneity()`: exact combinatorial homogeneity test (Le Roux, Bienaise &
+  Durand 2019, ch. 5), with `print()` and `plot()` methods. Compares the mean
+  points of two or more groups (`groups`, or all categories of `group` for the
+  global comparison), with the *partial* comparison (groups within the whole
+  cloud) and the *specific* comparison (cloud restricted to the groups). For
+  **two groups** the statistic is the squared Mahalanobis distance D²_M between
+  the two mean points, with a compatibility region (the principal κ-ellipsoid in
+  two or more dimensions; a signed one-sided test and an exact compatibility
+  interval in one dimension); for **more than two groups** it is the between-
+  group Mahalanobis variance V_M (an omnibus test, no region). A proportion-of-
+  variance (partial η²) descriptive index is always reported. Reproduces the
+  book's Target example (two-group partial p = 1/2520, κ ≈ 3.36; specific
+  p = 2/10; global three-group omnibus p = 37/2520).
+* `plot()` methods for the test results, drawn with ggplot2: for typicality, the
+  cloud with its centre, the group mean and the compatibility ellipse; for
+  homogeneity, the observed deviation against its compatibility region.
 * `typicality_comb()` gains a `level` argument, so a group can be named as a
   category of a supplementary/grouping variable (a vector, or a variable name
   stored in the GDA result, e.g. a FactoMineR `quali.sup`).

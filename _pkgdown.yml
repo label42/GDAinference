@@ -25,6 +25,12 @@ reference:
   - typicality_comb
   - typicality_byvar
   - typicality_geom
+- title: Homogeneity test
+  desc: >
+    Exact combinatorial test of the homogeneity of two groups in a geometric
+    (GDA) cloud (Le Roux, Bienaise & Durand 2019, chapter 5).
+  contents:
+  - homogeneity
 - title: Compatibility with GDA packages
   desc: >
     Extract principal coordinates from the result objects of the common GDA
@@ -37,8 +43,10 @@ reference:
   - print.gdainference_test
   - print.typicality_byvar
   - print.typicality_geom
+  - print.homogeneity
   - plot.typicality_comb
   - plot.typicality_geom
+  - plot.homogeneity
 - title: Data sets
   desc: Didactic data from Le Roux, Bienaise & Durand (2019).
   contents:
