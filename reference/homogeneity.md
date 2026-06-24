@@ -194,7 +194,7 @@ homogeneity(Target, grp, groups = c(1, 2), comparison = "specific")  # 2/10
 #> Combinatorial homogeneity test (two groups)
 #> -------------------------------------------
 #> Cloud           : n = 5 points, dimensionality L = 2
-#> Comparison      : global -- "1" (n1 = 3) vs "2" (n2 = 2)
+#> Comparison      : specific -- "1" (n1 = 3) vs "2" (n2 = 2)
 #> 
 #> Proportion of variance (eta^2) = 0.6976  -- notable difference
 #> Mahalanobis distance D = 2.004  (D^2 = 4.014) between the mean points
