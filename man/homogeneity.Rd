@@ -117,8 +117,25 @@ and the two kinds coincide: this is the \strong{global} comparison.
 
 When the number of arrangements does not exceed \code{max_samples}, the exact
 exhaustive distribution is computed; otherwise \code{max_samples} arrangements are
-drawn at random (Monte Carlo). The (inclusive) p-value is the proportion of
-arrangements whose statistic is greater than or equal to the observed one.
+drawn at random (Monte Carlo). In the exhaustive case the (inclusive)
+p-value is the exact proportion of arrangements whose statistic is greater
+than or equal to the observed one; in the Monte Carlo case the add-one
+correction of Phipson & Smyth (2010) is applied (\eqn{p = (b + 1)/(B + 1)}),
+so the estimated p-value is valid and never zero.
+
+\strong{One-sided convention (two groups on a single axis).} When two groups are
+compared in a one-dimensional cloud, the p-value is one-sided \emph{in the
+direction of the observed difference} (the book's convention). Because that
+direction is chosen from the data, a non-directional claim at level
+\eqn{\alpha} requires comparing the one-sided p-value to \eqn{\alpha/2};
+this matches the compatibility interval, which excludes zero exactly when
+\eqn{p < \alpha/2}.
+
+\strong{Compatibility region and randomness.} In dimension > 1 the two-group
+region is \emph{adjusted} over \code{n_dir} random directions (Le Roux et al. 2019,
+§5.4.3), so \eqn{\kappa} varies slightly from run to run — even when the
+permutation distribution itself is exhaustive — unless \code{seed} is set.
+Increase \code{n_dir} to stabilise it.
 }
 \examples{
 # Target example from Le Roux et al. (2019), chapter 5: three groups of the
@@ -131,6 +148,11 @@ homogeneity(Target, grp)        # global omnibus of the three groups: p = 37/252
 \references{
 Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
 \emph{Combinatorial Inference in Geometric Data Analysis}. Chapman & Hall/CRC.
+
+Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+\emph{Statistical Applications in Genetics and Molecular Biology}, 9(1),
+Article 39.
 }
 \seealso{
 \code{\link[=typicality_comb]{typicality_comb()}}, \code{\link[=typicality_geom]{typicality_geom()}}, \code{\link[=get_coord]{get_coord()}}

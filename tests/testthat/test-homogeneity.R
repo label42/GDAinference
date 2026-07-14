@@ -82,6 +82,15 @@ test_that("groups default to the two categories when there are exactly two", {
   expect_identical(res$n, 10L)
 })
 
+test_that("a seeded call does not disturb the global RNG stream", {
+  set.seed(99); before <- rnorm(5)
+  set.seed(99)
+  invisible(homogeneity(Target, grp, groups = c(1, 2), max_samples = 500,
+                        seed = 1, n_dir = 10, keep_geometry = FALSE))
+  after <- rnorm(5)
+  expect_identical(before, after)
+})
+
 test_that("Monte Carlo mode is reproducible and consistent with the exact p", {
   r1 <- homogeneity(Target, grp, groups = c(1, 2), max_samples = 1000, seed = 7)
   r2 <- homogeneity(Target, grp, groups = c(1, 2), max_samples = 1000, seed = 7)
@@ -89,6 +98,27 @@ test_that("Monte Carlo mode is reproducible and consistent with the exact p", {
   expect_identical(r1$n_perm, 1000L)
   expect_equal(r1$p_value, r2$p_value)           # same seed -> identical
   expect_lt(r1$p_value, 0.02)                    # exact p = 1/2520 is tiny
+})
+
+test_that("Monte Carlo p-values are add-one corrected and never zero", {
+  set.seed(8)
+  X <- matrix(rnorm(80), ncol = 2)
+  X[1:10, ] <- X[1:10, ] + 4                     # separated groups: n_sup = 0
+  g <- rep(c("a", "b"), c(10, 30))
+  res <- homogeneity(X, g, max_samples = 1000, seed = 2)
+  expect_identical(res$method, "montecarlo")
+  expect_equal(res$p_value, (res$n_sup + 1) / (res$n_perm + 1))
+  expect_gt(res$p_value, 0)
+  expect_output(print(res), "add-one")
+
+  res1 <- homogeneity(X, g, axes = 1, max_samples = 1000, seed = 2)
+  expect_identical(res1$method, "montecarlo")
+  expect_equal(res1$p_value, (res1$n_sup + 1) / (res1$n_perm + 1))
+  expect_gt(res1$p_value, 0)
+
+  # the exhaustive p-value stays the exact proportion
+  ex <- homogeneity(Target, grp, groups = c(1, 2))
+  expect_equal(ex$p_value, ex$n_sup / ex$n_perm)
 })
 
 test_that("one-dimensional analysis gives a signed test and an interval", {
@@ -107,12 +137,34 @@ test_that("one-dimensional analysis gives a signed test and an interval", {
   expect_false(iv[1] <= 0 && 0 <= iv[2])
 })
 
+test_that("a rank-deficient cloud warns about dependent axes", {
+  set.seed(22)
+  z <- rnorm(12)
+  X2 <- cbind(z, 2 * z)
+  g <- rep(c("a", "b"), 6)
+  expect_warning(homogeneity(X2, g, keep_geometry = FALSE),
+                 "linearly dependent")
+})
+
+test_that("results are invariant under a change of coordinate scale", {
+  r1 <- homogeneity(Target, grp, groups = c(1, 2), seed = 1)
+  rs <- homogeneity(as.matrix(Target) * 1e-5, grp, groups = c(1, 2), seed = 1)
+  expect_equal(rs$statistic2, r1$statistic2, tolerance = 1e-8)
+  expect_equal(rs$p_value, r1$p_value, tolerance = 1e-12)
+  expect_identical(rs$dim, r1$dim)
+})
+
 test_that("invalid input is rejected with informative errors", {
   expect_error(homogeneity(Target, grp, groups = 1), "at least two")
   expect_error(homogeneity(Target, grp, groups = c(1, 9)), "not found")
   expect_error(homogeneity(Target, grp, groups = c(2, 2)), "distinct")
   expect_error(homogeneity(Target, grp, groups = c(1, 2, 1)), "distinct")
   expect_error(homogeneity(Target, grp, groups = c(1, 2), alpha = 0), "alpha")
+})
+
+test_that("one-sided results print a level warning (compare to alpha/2)", {
+  res <- homogeneity(Target, grp, groups = c(1, 2), axes = 1)
+  expect_output(print(res), "alpha/2")
 })
 
 test_that("print and plot behave", {

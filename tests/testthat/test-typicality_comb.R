@@ -50,6 +50,14 @@ test_that("a logical / index group matches the equivalent coordinate group", {
   expect_identical(r_log$n_c, 3L)
 })
 
+test_that("a seeded call does not disturb the global RNG stream", {
+  set.seed(99); before <- rnorm(5)
+  set.seed(99)
+  invisible(typicality_comb(Target, c(1L, 3L, 5L), max_samples = 50, seed = 1))
+  after <- rnorm(5)
+  expect_identical(before, after)
+})
+
 test_that("Monte Carlo mode is reproducible under a fixed seed", {
   r1 <- typicality_comb(Target, Target_group, max_samples = 100, seed = 42)
   r2 <- typicality_comb(Target, Target_group, max_samples = 100, seed = 42)
@@ -57,6 +65,23 @@ test_that("Monte Carlo mode is reproducible under a fixed seed", {
   expect_identical(r1$method, "montecarlo")
   expect_identical(r1$n_perm, 100L)
   expect_equal(r1$p_value, r2$p_value)
+})
+
+test_that("Monte Carlo p-values are add-one corrected and never zero", {
+  set.seed(5)
+  X <- matrix(rnorm(400), ncol = 2)
+  X[1:20, ] <- X[1:20, ] + 3                     # far-out group: n_sup = 0
+  res <- typicality_comb(X, 1:20, max_samples = 2000, seed = 1)
+
+  expect_identical(res$method, "montecarlo")
+  expect_identical(res$n_sup, 0L)
+  # Phipson & Smyth (2010): p = (b + 1) / (B + 1), never zero
+  expect_equal(res$p_value, (res$n_sup + 1) / (res$n_perm + 1))
+  expect_gt(res$p_value, 0)
+  expect_output(print(res), "add-one")
+  # the exhaustive p-value stays the exact proportion
+  ex <- typicality_comb(Target, Target_group)
+  expect_equal(ex$p_value, ex$n_sup / ex$n_perm)
 })
 
 test_that("invalid input is rejected with informative errors", {
@@ -80,6 +105,35 @@ test_that("the `level` argument selects a category of a grouping variable", {
 
   expect_equal(r_level$p_value, r_logical$p_value)
   expect_identical(r_level$n_c, sum(g == "upper"))
+})
+
+test_that("results are invariant under a change of coordinate scale", {
+  r1 <- typicality_comb(Target, Target_group)
+  rs <- typicality_comb(as.matrix(Target) * 1e-5,
+                        as.matrix(Target_group) * 1e-5)
+  expect_equal(rs$statistic, r1$statistic, tolerance = 1e-8)
+  expect_equal(rs$p_value, r1$p_value, tolerance = 1e-12)
+  expect_identical(rs$dim, r1$dim)
+})
+
+test_that("an exactly rank-1 cloud keeps L = 1 whatever the scale", {
+  set.seed(11)
+  a <- rnorm(20)
+  for (s in c(1, 1e5)) {
+    r <- suppressWarnings(
+      typicality_comb(cbind(a, 2 * a) * s, group = c(2L, 5L, 9L)))
+    expect_identical(r$dim, 1L)
+  }
+})
+
+test_that("index-style groups are validated (no duplicates, positive, in range)", {
+  expect_error(typicality_comb(Target, group = c(1, 2, 1)), "unique")
+  expect_error(typicality_comb(Target, group = -1), "positive")
+  expect_error(typicality_comb(Target, group = c(1, 2.5)), "whole numbers")
+  expect_error(typicality_comb(Target, group = c(1, 99)), "reference rows")
+  # a duplicated vector that looks like a grouping variable hints at `level`
+  expect_error(typicality_comb(Target, group = c(1, 1, 3, 3, 3, 1, 3, 3, 2, 2)),
+               "level")
 })
 
 test_that("misuse of grouping variables errors helpfully", {

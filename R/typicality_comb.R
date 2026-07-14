@@ -12,8 +12,12 @@
 #' \eqn{n_c} is the size of the group). When the number of such subsets,
 #' \eqn{\binom{n}{n_c}}, does not exceed `max_samples`, the exact exhaustive
 #' distribution is computed; otherwise `max_samples` subsets are drawn at random
-#' (Monte Carlo). The (inclusive) p-value is the proportion of subsets whose
-#' statistic is greater than or equal to the observed \eqn{d^2_{obs}}.
+#' (Monte Carlo). In the exhaustive case the (inclusive) p-value is the exact
+#' proportion of subsets whose statistic is greater than or equal to the
+#' observed \eqn{d^2_{obs}}. In the Monte Carlo case the add-one correction of
+#' Phipson & Smyth (2010) is applied, \eqn{p = (b + 1)/(B + 1)} where \eqn{b}
+#' is the number of sampled subsets at least as extreme as the observed
+#' statistic: a sampled permutation p-value can never legitimately be zero.
 #'
 #' @param reference Reference cloud: a numeric matrix/data frame of principal
 #'   coordinates (one row per point, one column per axis), or a GDA result
@@ -61,6 +65,11 @@
 #' @references
 #' Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
 #' *Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
+#'
+#' Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+#' zero: calculating exact p-values when permutations are randomly drawn.
+#' *Statistical Applications in Genetics and Molecular Biology*, 9(1),
+#' Article 39.
 #'
 #' @seealso [get_coord()]
 #'
@@ -119,13 +128,15 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
   } else {
     method <- "montecarlo"
     cardJ <- as.integer(max_samples)
-    if (!is.null(seed)) set.seed(seed)
     sampler <- function(B) matrix(replicate(B, sample.int(n, n_c)), nrow = n_c)
-    D2 <- .subset_norm2(Z, n_c, cardJ, sampler = sampler)
+    D2 <- .local_seed(seed, .subset_norm2(Z, n_c, cardJ, sampler = sampler))
   }
 
   n_sup <- sum(D2 >= d2_obs * (1 - 1e-12))
-  p_value <- n_sup / cardJ
+  # Exhaustive: exact proportion. Monte Carlo: add-one correction of
+  # Phipson & Smyth (2010), so the estimated p-value is valid and never zero.
+  p_value <- if (method == "exhaustive") n_sup / cardJ
+             else (n_sup + 1) / (cardJ + 1)
 
   # Compatibility region (Prop. 3.6): scale of the principal ellipsoid
   rank_a <- cardJ - trunc(cardJ * alpha)
@@ -175,6 +186,10 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
 #' Centres the cloud, computes its ML covariance, diagonalises it and returns
 #' the change-of-basis to the orthonormal principal basis in which the
 #' Mahalanobis distance becomes the ordinary Euclidean distance.
+#'
+#' `tol` is relative to the largest eigenvalue, so the retained dimension L
+#' (and hence every statistic) is invariant under a rescaling of the
+#' coordinates.
 #' @noRd
 .cloud_basis <- function(X, tol = 1.5e-8) {
   X <- as.matrix(X)
@@ -183,11 +198,11 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
   Xc <- sweep(X, 2, center, "-")
   Mcov <- crossprod(Xc) / n
   eig <- eigen(Mcov, symmetric = TRUE)
-  L <- sum(eig$values > tol)
-  if (L < 1L) {
+  if (eig$values[1L] <= 0) {
     stop("The reference cloud is degenerate (no non-null dimension).",
          call. = FALSE)
   }
+  L <- sum(eig$values > tol * eig$values[1L])
   lambda <- eig$values[seq_len(L)]
   basis <- eig$vectors[, seq_len(L), drop = FALSE] %*%
     diag(1 / sqrt(lambda), nrow = L)
@@ -248,6 +263,7 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
   }
   # Case 3: integer / character index into reference rows
   if (is.numeric(group) || is.character(group)) {
+    .validate_indices(group, nrow(X_ref))
     sub <- tryCatch(X_ref[group, , drop = FALSE], error = function(e) {
       stop("`group` indices do not match the reference rows.", call. = FALSE)
     })

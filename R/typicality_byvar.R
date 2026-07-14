@@ -115,7 +115,10 @@ print.typicality_byvar <- function(x, digits = 3, ...) {
     category = tab$category,
     n_c = tab$n_c,
     D = formatC(tab$D, format = "f", digits = digits),
-    p_value = formatC(tab$p_value, format = "f", digits = digits),
+    p_value = ifelse(
+      tab$p_value < 0.5 * 10^-digits,
+      paste0("<", formatC(10^-digits, format = "f", digits = digits)),
+      formatC(tab$p_value, format = "f", digits = digits)),
     sig = ifelse(tab$p_value <= x$alpha, "*", ""),
     notable = ifelse(tab$notable, "yes", "no"),
     stringsAsFactors = FALSE

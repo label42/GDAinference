@@ -18,6 +18,18 @@ test_that("typicality_byvar prints a table", {
   expect_output(print(typicality_byvar(Target, g)), "by category")
 })
 
+test_that("tiny Monte Carlo p-values print as a bound, not as zero", {
+  set.seed(12)
+  X <- matrix(rnorm(400), ncol = 2)
+  g <- factor(rep(c("a", "b"), each = 100))
+  X[g == "a", ] <- X[g == "a", ] + 3
+  res <- typicality_byvar(X, g, max_samples = 2000, seed = 1)
+  expect_true(all(res$table$p_value > 0))
+  out <- capture.output(print(res))
+  expect_false(any(grepl("0.000", out, fixed = TRUE)))
+  expect_true(any(grepl("<0.001", out, fixed = TRUE)))
+})
+
 test_that("a single-category variable yields no testable subgroup", {
   g1 <- factor(rep("only", nrow(Target)))
   expect_error(typicality_byvar(Target, g1), "valid subgroup")

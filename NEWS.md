@@ -1,5 +1,42 @@
 # GDAinference 0.0.0.9000 (development version)
 
+## Statistical fixes (audit)
+
+* **Monte Carlo p-values now use the add-one correction of Phipson & Smyth
+  (2010)**: `p = (b + 1) / (B + 1)`. A sampled permutation p-value can
+  therefore never be zero and the test keeps its nominal level near decision
+  thresholds. Exhaustive p-values are unchanged (exact proportions); all the
+  book's golden-master values still reproduce. Monte Carlo p-values obtained
+  with earlier versions were `n_sup / max_samples` and shift slightly.
+  `print()` marks corrected p-values, and `print.typicality_byvar()` shows
+  tiny p-values as a bound (e.g. `<0.001`) instead of `0.000`.
+* Index-style `group` arguments are now validated: duplicated, negative,
+  fractional or out-of-range indices are rejected with informative errors.
+  Previously a numeric grouping variable passed without `level` was silently
+  treated as row indices (duplicating rows).
+* The rank of a cloud is now detected with a tolerance *relative* to the
+  largest eigenvalue, so all results are invariant under a rescaling of the
+  coordinates (small-scale coordinates were spuriously declared degenerate).
+* `typicality_geom()` on a rank-deficient cloud spanning several axes
+  (`L < K`): the compatibility region is now the kappa form consistent with
+  the two-sided p-value; previously an axis-1 interval was paired with a
+  two-sided test. A warning now also flags linearly dependent axes in
+  `typicality_geom()` and `homogeneity()` (as it already did in
+  `typicality_comb()`).
+* One-sided one-dimensional tests (`typicality_geom()`, two-group
+  `homogeneity()` on a single axis) now document and print that the direction
+  is taken from the data: compare the one-sided p-value to `alpha/2` for a
+  non-directional claim (this matches the compatibility interval).
+* Compatibility-region internals: a materially negative discriminant in the
+  two-group homogeneity region (possible in degenerate configurations) no
+  longer fabricates finite roots; the affected nesting is treated as
+  non-informative. The geometric region's discriminant is clamped at zero
+  (it is non-negative by construction).
+* Setting `seed` no longer mutates the caller's global RNG state: the stream
+  is restored after each call. Seeded results are unchanged.
+
+## Initial release
+
 * Initial scaffolding of the package.
 * `get_coord()`: compatibility layer extracting principal coordinates from
   matrices/data frames and from FactoMineR, GDAtools and ade4 result objects.

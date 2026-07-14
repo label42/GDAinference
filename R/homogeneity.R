@@ -33,8 +33,25 @@
 #'
 #' When the number of arrangements does not exceed `max_samples`, the exact
 #' exhaustive distribution is computed; otherwise `max_samples` arrangements are
-#' drawn at random (Monte Carlo). The (inclusive) p-value is the proportion of
-#' arrangements whose statistic is greater than or equal to the observed one.
+#' drawn at random (Monte Carlo). In the exhaustive case the (inclusive)
+#' p-value is the exact proportion of arrangements whose statistic is greater
+#' than or equal to the observed one; in the Monte Carlo case the add-one
+#' correction of Phipson & Smyth (2010) is applied (\eqn{p = (b + 1)/(B + 1)}),
+#' so the estimated p-value is valid and never zero.
+#'
+#' **One-sided convention (two groups on a single axis).** When two groups are
+#' compared in a one-dimensional cloud, the p-value is one-sided *in the
+#' direction of the observed difference* (the book's convention). Because that
+#' direction is chosen from the data, a non-directional claim at level
+#' \eqn{\alpha} requires comparing the one-sided p-value to \eqn{\alpha/2};
+#' this matches the compatibility interval, which excludes zero exactly when
+#' \eqn{p < \alpha/2}.
+#'
+#' **Compatibility region and randomness.** In dimension > 1 the two-group
+#' region is *adjusted* over `n_dir` random directions (Le Roux et al. 2019,
+#' §5.4.3), so \eqn{\kappa} varies slightly from run to run — even when the
+#' permutation distribution itself is exhaustive — unless `seed` is set.
+#' Increase `n_dir` to stabilise it.
 #'
 #' @param x The cloud: a numeric matrix/data frame of principal coordinates
 #'   (one row per individual, one column per axis), or a GDA result object from
@@ -87,6 +104,11 @@
 #' Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
 #' *Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
 #'
+#' Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+#' zero: calculating exact p-values when permutations are randomly drawn.
+#' *Statistical Applications in Genetics and Molecular Biology*, 9(1),
+#' Article 39.
+#'
 #' @seealso [typicality_comb()], [typicality_geom()], [get_coord()]
 #'
 #' @examples
@@ -136,6 +158,11 @@ homogeneity <- function(x, group, groups = NULL,
   basis <- .cloud_basis(X)
   Z <- basis$Z
   L <- basis$L
+  if (L < ncol(X)) {
+    warning("The cloud has dimension L = ", L, " < ", ncol(X),
+            " (number of axes). Some axes are linearly dependent.",
+            call. = FALSE)
+  }
   ctr <- basis$center
 
   # Observed group means and statistics -------------------------------------
@@ -169,10 +196,14 @@ homogeneity <- function(x, group, groups = NULL,
   }
 
   # Permutation distribution -------------------------------------------------
-  gen <- .homog_nesting_gen(n, sizes, comparison, max_samples, seed)
-  acc <- .homog_accumulate(gen, Z, sizes, nprim, region_info)
+  gen <- .homog_nesting_gen(n, sizes, comparison, max_samples)
+  acc <- .local_seed(seed, .homog_accumulate(gen, Z, sizes, nprim, region_info))
   cardJ <- gen$cardJ
   oneD <- twoGroup && L == 1L
+  # Exhaustive: exact proportion. Monte Carlo: add-one correction of
+  # Phipson & Smyth (2010), so the estimated p-value is valid and never zero.
+  .pval <- if (gen$method == "exhaustive") function(b) b / cardJ
+           else function(b) (b + 1) / (cardJ + 1)
 
   if (oneD) {
     # Signed difference of the two group means: one-sided p-value and exact
@@ -188,7 +219,7 @@ homogeneity <- function(x, group, groups = NULL,
     }
     tol <- abs(diff_val) * 1e-12
     n_sup <- min(sum(dj >= diff_val - tol), sum(dj <= diff_val + tol))
-    p_value <- n_sup / cardJ
+    p_value <- .pval(n_sup)
     sided <- "one-sided"
     direction <- if (diff_val >= 0)
       sprintf("%s > %s", groups[2L], groups[1L]) else sprintf("%s > %s", groups[1L], groups[2L])
@@ -196,7 +227,7 @@ homogeneity <- function(x, group, groups = NULL,
     perm_vec <- dj
   } else {
     n_sup <- sum(acc$VM >= vm_obs * (1 - 1e-12))
-    p_value <- n_sup / cardJ
+    p_value <- .pval(n_sup)
     diff_val <- NA_real_
     direction <- NA_character_
     perm_vec <- acc$VM
@@ -302,11 +333,23 @@ print.homogeneity <- function(x, digits = 4, ...) {
 
   cat(sprintf("Distribution    : %s, %s arrangements\n",
               x$method_label, format(x$n_perm, big.mark = ",")))
-  cat(sprintf("p-value%s : %s / %s = %s\n",
-              if (identical(x$sided, "one-sided")) " (1-sided)" else "        ",
-              format(x$n_sup, big.mark = ","),
-              format(x$n_perm, big.mark = ","),
-              format(x$p_value, digits = digits)))
+  if (identical(x$method, "montecarlo")) {
+    cat(sprintf("p-value%s : (%s + 1) / (%s + 1) = %s  (add-one corrected)\n",
+                if (identical(x$sided, "one-sided")) " (1-sided)" else "        ",
+                format(x$n_sup, big.mark = ","),
+                format(x$n_perm, big.mark = ","),
+                format(x$p_value, digits = digits)))
+  } else {
+    cat(sprintf("p-value%s : %s / %s = %s\n",
+                if (identical(x$sided, "one-sided")) " (1-sided)" else "        ",
+                format(x$n_sup, big.mark = ","),
+                format(x$n_perm, big.mark = ","),
+                format(x$p_value, digits = digits)))
+  }
+  if (identical(x$sided, "one-sided")) {
+    cat("  (direction chosen from the data: for a non-directional claim,\n",
+        "   compare the one-sided p-value to alpha/2)\n", sep = "")
+  }
 
   comp <- x$compatibility
   if (!is.null(comp)) {
@@ -375,7 +418,7 @@ print.homogeneity <- function(x, digits = 4, ...) {
 #' the `sizes[c] x B` matrices of row indices allocated to each group in `B`
 #' successive arrangements. The remaining individuals form the residual group.
 #' @noRd
-.homog_nesting_gen <- function(n, sizes, comparison, max_samples, seed) {
+.homog_nesting_gen <- function(n, sizes, comparison, max_samples) {
   Cp <- length(sizes)
   nprim <- sum(sizes)
   remaining <- n - c(0L, cumsum(sizes)[-Cp])
@@ -391,7 +434,6 @@ print.homogeneity <- function(x, digits = 4, ...) {
     list(cardJ = cardJ, method = "exhaustive", get_batch = get_batch)
   } else {
     cardJ <- as.integer(max_samples)
-    if (!is.null(seed)) set.seed(seed)
     get_batch <- function(done, B) {
       P <- vapply(seq_len(B), function(b) sample.int(n, nprim), integer(nprim))
       if (!is.matrix(P)) P <- matrix(P, nrow = nprim)
@@ -476,10 +518,9 @@ print.homogeneity <- function(x, digits = 4, ...) {
   Cnul <- which(Cj < 1e-12)
   rank_inf <- trunc(alpha * cardJ) + 1L
   coef <- n1 * n2 / (n * nprim)
-  if (!is.null(seed)) set.seed(seed)
 
   kappa <- numeric(2L * n_dir)
-  for (d in seq_len(n_dir)) {
+  .local_seed(seed, for (d in seq_len(n_dir)) {
     if (Lr == 1L) {
       U <- U_OD[, 1L]
     } else {
@@ -488,9 +529,20 @@ print.homogeneity <- function(x, digits = 4, ...) {
     }
     A <- eps^2 - 1 + abs(Cj - U^2) * coef
     Bq <- eps * U
-    Delta <- abs(Bq^2 - A * Cj)
-    x1 <- (-Bq + sqrt(Delta)) / A
-    x2 <- (-Bq - sqrt(Delta)) / A
+    Delta <- Bq^2 - A * Cj
+    # When A > 0 the discriminant can be materially negative: the quadratic has
+    # no real root and that nesting is non-informative along this direction
+    # (-Inf, Inf). Otherwise Delta can only dip below zero through rounding;
+    # clamp it instead of taking abs(), which fabricated finite roots.
+    noroot <- Delta < -1e-9 * pmax(Bq^2 + abs(A * Cj), 1e-300)
+    x1 <- (-Bq + sqrt(pmax(Delta, 0))) / A
+    x2 <- (-Bq - sqrt(pmax(Delta, 0))) / A
+    swap <- !is.na(x1) & !is.na(x2) & x1 > x2       # A > 0 reverses the roots
+    if (any(swap)) {
+      tmp <- x1[swap]; x1[swap] <- x2[swap]; x2[swap] <- tmp
+    }
+    x1[noroot] <- -Inf
+    x2[noroot] <- Inf
     AC <- setdiff(which(abs(A) < 1e-12), Cnul)
     if (length(AC)) {
       x1[AC] <- -Inf; x2[AC] <- Inf
@@ -505,7 +557,7 @@ print.homogeneity <- function(x, digits = 4, ...) {
     }
     kappa[2L * d - 1L] <- abs(sort(x1)[rank_inf])
     kappa[2L * d] <- sort(x2)[cardJ + 1L - rank_inf]
-  }
+  })
   if (any(!is.finite(kappa))) {
     return(list(type = "none", kappa = NA_real_,
                 message = "Finite compatibility region is not accessible."))

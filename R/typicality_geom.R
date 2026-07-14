@@ -14,7 +14,24 @@
 #' When \eqn{2^{n-1} \le} `max_samples` the exact distribution is enumerated,
 #' otherwise `max_samples` sign patterns are drawn at random (Monte Carlo). The
 #' p-value is the proportion of permutations whose statistic is at least the
-#' observed one; in the one-dimensional case it is one-sided.
+#' observed one; in the one-dimensional case it is one-sided. In the Monte
+#' Carlo case the add-one correction of Phipson & Smyth (2010) is applied
+#' (\eqn{p = (b + 1)/(B + 1)}, before the one-sided halving), so the estimated
+#' p-value is valid and never zero; exhaustive p-values are exact proportions.
+#'
+#' **One-sided convention (single axis).** In the one-dimensional case the
+#' p-value is one-sided *in the direction of the observed deviation* (the
+#' book's convention). Because that direction is chosen from the data, a
+#' non-directional claim at level \eqn{\alpha} requires comparing the
+#' one-sided p-value to \eqn{\alpha/2}; this matches the compatibility
+#' interval, which excludes the reference point exactly when
+#' \eqn{p < \alpha/2}.
+#'
+#' **Compatibility region and randomness.** In dimension > 1 the region is
+#' *adjusted* over `n_dir` random directions (Le Roux et al. 2019, §4.2.4),
+#' so \eqn{\kappa} varies slightly from run to run — even when the
+#' permutation distribution itself is exhaustive — unless `seed` is set.
+#' Increase `n_dir` to stabilise it.
 #'
 #' @param x The cloud: a numeric matrix/data frame of principal coordinates, or
 #'   a GDA result object from \pkg{FactoMineR}, \pkg{GDAtools} or \pkg{ade4}
@@ -55,6 +72,11 @@
 #' Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
 #' *Combinatorial Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
 #'
+#' Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+#' zero: calculating exact p-values when permutations are randomly drawn.
+#' *Statistical Applications in Genetics and Molecular Biology*, 9(1),
+#' Article 39.
+#'
 #' @seealso [typicality_comb()], [get_coord()]
 #'
 #' @examples
@@ -86,6 +108,12 @@ typicality_geom <- function(x, point = 0, group = NULL, level = NULL,
       }
       which(group)
     } else {
+      if (is.factor(group)) {
+        stop("`group` looks like a grouping variable (a factor). To restrict ",
+             "the cloud to one category, also supply `level = \"...\"`.",
+             call. = FALSE)
+      }
+      .validate_indices(group, n_full)
       group
     }
     X <- tryCatch(X[idx, , drop = FALSE],
@@ -102,6 +130,11 @@ typicality_geom <- function(x, point = 0, group = NULL, level = NULL,
   basis <- .cloud_basis(X)
   Z <- basis$Z
   L <- basis$L
+  if (L < K) {
+    warning("The cloud has dimension L = ", L, " < ", K,
+            " (number of axes). Some axes are linearly dependent.",
+            call. = FALSE)
+  }
   center <- basis$center
   ZGP <- as.numeric((center - P) %*% basis$basis)   # G - P in calibrated basis
   norm2_PG <- sum(ZGP * ZGP)
@@ -121,16 +154,22 @@ typicality_geom <- function(x, point = 0, group = NULL, level = NULL,
   n_sup <- sum(d2P >= d2_obs * (1 - 1e-12))
 
   sided <- if (K == 1L) "one-sided" else "two-sided"
+  # Exhaustive: exact proportions. Monte Carlo: add-one correction of
+  # Phipson & Smyth (2010), applied to the sampled sign patterns before the
+  # one-sided halving, so the estimated p-value is valid and never zero.
+  mc <- sf$method == "montecarlo"
+  num <- if (mc) n_sup + 1L else n_sup
+  den <- if (mc) cardJ + 1L else cardJ
   if (K == 1L) {
-    p_value <- n_sup / (2 * cardJ)
-    disp_num <- n_sup; disp_den <- 2L * cardJ
+    p_value <- num / (2 * den)
+    disp_num <- num; disp_den <- 2L * den
   } else {
-    p_value <- n_sup / cardJ
-    disp_num <- 2L * n_sup; disp_den <- 2L * cardJ
+    p_value <- num / den
+    disp_num <- 2L * num; disp_den <- 2L * den
   }
 
   # compatibility region ---------------------------------------------------
-  comp <- .geom_region(U, eps, ZGP, norm2_PG, alpha, n_dir, L, cardJ, seed,
+  comp <- .geom_region(U, eps, ZGP, norm2_PG, alpha, n_dir, L, K, cardJ, seed,
                        center, basis, P)
 
   structure(
@@ -194,11 +233,17 @@ print.typicality_geom <- function(x, digits = 4, ...) {
               format(x$statistic2, digits = digits)))
   cat(sprintf("Distribution    : %s, %s samples\n",
               x$method_label, format(x$n_perm, big.mark = ",")))
-  cat(sprintf("p-value         : %s / %s = %s%s\n",
+  cat(sprintf("p-value         : %s / %s = %s%s%s\n",
               format(x$n_sup_display, big.mark = ","),
               format(x$n_perm_display, big.mark = ","),
               format(x$p_value, digits = digits),
-              if (identical(x$sided, "one-sided")) "  (one-sided)" else ""))
+              if (identical(x$sided, "one-sided")) "  (one-sided)" else "",
+              if (identical(x$method, "montecarlo"))
+                "  (add-one corrected)" else ""))
+  if (identical(x$sided, "one-sided")) {
+    cat("  (direction chosen from the data: for a non-directional claim,\n",
+        "   compare the one-sided p-value to alpha/2)\n", sep = "")
+  }
 
   comp <- x$compatibility
   if (!is.null(comp)) {
@@ -255,19 +300,20 @@ print.typicality_geom <- function(x, digits = 4, ...) {
          cardJ = cardJ, method = "exhaustive")
   } else {
     cardJ <- as.integer(max_samples)
-    if (!is.null(seed)) set.seed(seed)
     U <- matrix(0, cardJ, L)
     eps <- numeric(cardJ)
     batch <- max(1L, min(8192L, as.integer(2e6 / n)))
-    done <- 0L
-    while (done < cardJ) {
-      B <- min(batch, cardJ - done)
-      Eb <- matrix(sample(c(-1L, 1L), B * n, replace = TRUE), B, n)
-      rows <- (done + 1L):(done + B)
-      eps[rows] <- rowSums(Eb) / n
-      U[rows, ] <- (Eb %*% Z) / n
-      done <- done + B
-    }
+    .local_seed(seed, {
+      done <- 0L
+      while (done < cardJ) {
+        B <- min(batch, cardJ - done)
+        Eb <- matrix(sample(c(-1L, 1L), B * n, replace = TRUE), B, n)
+        rows <- (done + 1L):(done + B)
+        eps[rows] <- rowSums(Eb) / n
+        U[rows, ] <- (Eb %*% Z) / n
+        done <- done + B
+      }
+    })
     list(U = U, eps = eps, cardJ = cardJ, method = "montecarlo")
   }
 }
@@ -277,18 +323,20 @@ print.typicality_geom <- function(x, digits = 4, ...) {
 #' Implements the random-direction construction (Le Roux et al. 2019, §4.2.4):
 #' along each direction, every permutation defines an interval of compatible
 #' points via a quadratic; the order statistics give the scale, averaged over
-#' directions. In dimension 1 the exact interval is returned.
+#' directions. For a genuinely one-dimensional analysis (a single axis,
+#' `K == 1`) the exact interval is returned in the units of that axis; a
+#' rank-deficient cloud on several axes (`L == 1 < K`) gets the
+#' kappa-ellipsoid form, degenerate along the cloud's single direction.
 #' @noRd
-.geom_region <- function(U, eps, ZGP, norm2_PG, alpha, n_dir, L, cardJ, seed,
-                         center, basis, P) {
+.geom_region <- function(U, eps, ZGP, norm2_PG, alpha, n_dir, L, K, cardJ,
+                         seed, center, basis, P) {
   C <- rowSums(U * U)                                   # |GGj|^2
   Anul <- which(abs(C + eps^2 - 1) < 1e-12)             # particular case: infinite
   rank_inf <- trunc(alpha * cardJ) + 1L
   if (L == 1L) n_dir <- 1L
-  if (!is.null(seed)) set.seed(seed)
 
   kappa <- numeric(2L * n_dir)
-  for (d in seq_len(n_dir)) {
+  .local_seed(seed, for (d in seq_len(n_dir)) {
     if (L == 1L) {
       Uproj <- U[, 1L]
     } else {
@@ -297,20 +345,23 @@ print.typicality_geom <- function(x, digits = 4, ...) {
     }
     A <- C - Uproj^2 + eps^2 - 1
     B <- -eps * Uproj
-    Delta <- abs(B^2 - A * C)
+    # By Bessel's inequality eps^2 + |U|^2 <= 1 in the orthocalibrated basis,
+    # so A <= 0 (with A ~ 0 only on Anul) and the discriminant is non-negative
+    # up to rounding: clamp it rather than abs() it.
+    Delta <- pmax(B^2 - A * C, 0)
     x1 <- (-B + sqrt(Delta)) / A
     x2 <- (-B - sqrt(Delta)) / A
     x1[Anul] <- -Inf
     x2[Anul] <- Inf
     kappa[2L * d - 1L] <- abs(sort(x1)[rank_inf])
     kappa[2L * d] <- sort(x2)[cardJ + 1L - rank_inf]
-  }
+  })
 
   if (any(!is.finite(kappa))) {
     return(list(type = "none", kappa = NA_real_, interval = NULL,
                 message = "Finite compatibility region is not accessible."))
   }
-  if (L == 1L) {
+  if (K == 1L) {
     sd1 <- sqrt(basis$Mcov[1L, 1L])
     lo <- center[1L] - kappa[1L] * sd1
     hi <- center[1L] + kappa[2L] * sd1

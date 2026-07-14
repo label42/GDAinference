@@ -43,6 +43,55 @@
   dat[[name]]
 }
 
+#' Evaluate an expression under a local RNG seed
+#'
+#' When `seed` is non-NULL, snapshots the global `.Random.seed`, calls
+#' `set.seed(seed)`, evaluates `expr` and restores the snapshot on exit, so a
+#' seeded test never disturbs the caller's RNG stream. When `seed` is NULL the
+#' expression simply uses (and advances) the global stream.
+#' @noRd
+.local_seed <- function(seed, expr) {
+  if (is.null(seed)) return(expr)
+  has_old <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  old <- if (has_old) get(".Random.seed", envir = globalenv()) else NULL
+  on.exit({
+    if (has_old) {
+      assign(".Random.seed", old, envir = globalenv())
+    } else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+      rm(".Random.seed", envir = globalenv())
+    }
+  }, add = TRUE)
+  set.seed(seed)
+  expr
+}
+
+#' Validate an index-style group specification (row numbers or row names)
+#'
+#' Guards against the silent traps of R subscripting: duplicated indices
+#' (typically a grouping variable passed without `level`), negative indices
+#' (complement selection) and fractional or out-of-range row numbers.
+#' @noRd
+.validate_indices <- function(idx, n) {
+  if (is.numeric(idx)) {
+    if (any(idx < 0)) {
+      stop("`group` indices must be positive row numbers.", call. = FALSE)
+    }
+    if (any(idx != trunc(idx))) {
+      stop("`group` indices must be whole numbers.", call. = FALSE)
+    }
+    if (any(idx < 1) || any(idx > n)) {
+      stop("`group` indices do not match the reference rows (1..", n, ").",
+           call. = FALSE)
+    }
+  }
+  if (anyDuplicated(idx)) {
+    stop("`group` indices must be unique. If `group` is a grouping variable, ",
+         "also supply `level = \"...\"`, or use typicality_byvar() to test ",
+         "every category.", call. = FALSE)
+  }
+  invisible(idx)
+}
+
 #' Logical membership of a given level, with NA treated as non-member
 #' @noRd
 .level_membership <- function(var, level) {

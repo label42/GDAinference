@@ -234,7 +234,10 @@ while its difference from a neighbour is negligible.
   (with `ncp = Inf` in the MCA) to test in the full cloud.
 * **One dimension.** On a single axis the test becomes a signed, one-sided
   comparison of the two group means, with an exact compatibility *interval* --
-  useful to test a contrast on one interpreted axis.
+  useful to test a contrast on one interpreted axis. The direction is taken
+  from the observed difference, so for a *non-directional* claim compare the
+  one-sided p-value to $\alpha/2$ (this matches the interval, which excludes
+  zero exactly when $p < \alpha/2$).
 * **Other GDA packages.** The same calls work on a GDAtools `speMCA` / `csMCA`
   or an ade4 `dudi.pca` / `dudi.acm`; pass that object, and the grouping
   variable as a vector when it is not stored in the object.

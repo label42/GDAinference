@@ -83,7 +83,24 @@ generalized Mahalanobis distance between the permuted mean point and \code{P}.
 When \eqn{2^{n-1} \le} \code{max_samples} the exact distribution is enumerated,
 otherwise \code{max_samples} sign patterns are drawn at random (Monte Carlo). The
 p-value is the proportion of permutations whose statistic is at least the
-observed one; in the one-dimensional case it is one-sided.
+observed one; in the one-dimensional case it is one-sided. In the Monte
+Carlo case the add-one correction of Phipson & Smyth (2010) is applied
+(\eqn{p = (b + 1)/(B + 1)}, before the one-sided halving), so the estimated
+p-value is valid and never zero; exhaustive p-values are exact proportions.
+
+\strong{One-sided convention (single axis).} In the one-dimensional case the
+p-value is one-sided \emph{in the direction of the observed deviation} (the
+book's convention). Because that direction is chosen from the data, a
+non-directional claim at level \eqn{\alpha} requires comparing the
+one-sided p-value to \eqn{\alpha/2}; this matches the compatibility
+interval, which excludes the reference point exactly when
+\eqn{p < \alpha/2}.
+
+\strong{Compatibility region and randomness.} In dimension > 1 the region is
+\emph{adjusted} over \code{n_dir} random directions (Le Roux et al. 2019, §4.2.4),
+so \eqn{\kappa} varies slightly from run to run — even when the
+permutation distribution itself is exhaustive — unless \code{seed} is set.
+Increase \code{n_dir} to stabilise it.
 }
 \examples{
 # Target example (book ch. 4): the 10 impact points vs the centre O = (0, 0).
@@ -96,6 +113,11 @@ typicality_geom(Student, point = 0)
 \references{
 Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
 \emph{Combinatorial Inference in Geometric Data Analysis}. Chapman & Hall/CRC.
+
+Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+\emph{Statistical Applications in Genetics and Molecular Biology}, 9(1),
+Article 39.
 }
 \seealso{
 \code{\link[=typicality_comb]{typicality_comb()}}, \code{\link[=get_coord]{get_coord()}}
