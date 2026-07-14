@@ -10,7 +10,9 @@
   two-group `homogeneity()` plot likewise names the compared groups.
 * The typicality tutorial vignette has a rewritten introduction (why an MCA,
   how it is traditionally interpreted, why description alone is not enough),
-  a simpler cloud map, and clearer wording around sampling variability.
+  a simpler cloud map, and clearer wording around sampling variability. A new
+  section relates the typicality test to the v-test on a supplementary
+  category, of which it is the exact, multidimensional generalisation.
 * The `hdv2003` examples of the README and of the typicality and homogeneity
   vignettes now relabel the variables and categories in English.
 
