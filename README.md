@@ -5,6 +5,8 @@
 
 **Combinatorial inference for Geometric Data Analysis (GDA).**
 
+📖 **Documentation & tutorials:** <https://label42.github.io/GDAinference/>
+
 `GDAinference` implements the *exact* combinatorial (permutation) inference
 tests introduced by **Le Roux, Bienaise & Durand (2019),
 *Combinatorial Inference in Geometric Data Analysis* (Chapman & Hall/CRC).**
@@ -55,11 +57,17 @@ can extract the principal coordinates yourself and pass them as a matrix.
 ## Installation
 
 ```r
-# install.packages("remotes")
+install.packages("remotes")   # if not already installed
 remotes::install_github("label42/GDAinference")
 ```
 
 ## Example
+
+The example below uses two suggested packages (not installed automatically):
+
+```r
+install.packages(c("FactoMineR", "questionr"))
+```
 
 Run your GDA, then ask whether a group is atypical of the cloud:
 
