@@ -103,7 +103,7 @@ sr
 #> Proportion of variance (eta^2) = 0.04462  -- notable difference
 #> Mahalanobis distance D = 1.484  (D^2 = 2.203) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : 0 / 10,000 = 0
+#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.2816
 ```
 
@@ -151,9 +151,9 @@ do.call(rbind, lapply(pairs, function(p) {
              notable = r$notable)
 }))
 #>                         comparison    D  eta2 p_value notable
-#> 1 Exerce une profession vs Chomeur 0.16 0.001  0.1961   FALSE
-#> 2             Au foyer vs Retraite 0.32 0.003  0.0023   FALSE
-#> 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0000    TRUE
+#> 1 Exerce une profession vs Chomeur 0.16 0.001  0.1962   FALSE
+#> 2             Au foyer vs Retraite 0.32 0.003  0.0024   FALSE
+#> 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0001    TRUE
 ```
 
 Three contrasting situations, the whole point of the method:
@@ -192,7 +192,7 @@ homogeneity(mca, "occup", groups = c("Etudiant, eleve", "Retraite"),
 #> Proportion of variance (eta^2) = 0.1936  -- notable difference
 #> Mahalanobis distance D = 1.527  (D^2 = 2.332) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : 0 / 10,000 = 0
+#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.2834
 ```
 
@@ -228,7 +228,7 @@ homogeneity(mca, group = "sexe", axes = 1:2, seed = 1, max_samples = 1e4)
 #> Proportion of variance (eta^2) = 0.03097  -- small (< notable limit 0.04)
 #> Mahalanobis distance D = 0.5391  (D^2 = 0.2906) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : 0 / 10,000 = 0
+#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.1102
 ```
 
@@ -261,7 +261,7 @@ homogeneity(mca, group = "occup", axes = 1:2, seed = 1, max_samples = 1e4)
 #> Proportion of variance (eta^2) = 0.1104  -- notable difference
 #> Between-group M-variance V_M = 0.1976
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : 0 / 10,000 = 0
+#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
 ```
 
 `η² ≈ 0.11` of the cloud’s variance lies between the activity-status
@@ -300,7 +300,10 @@ while its difference from a neighbour is negligible.
 - **One dimension.** On a single axis the test becomes a signed,
   one-sided comparison of the two group means, with an exact
   compatibility *interval* – useful to test a contrast on one
-  interpreted axis.
+  interpreted axis. The direction is taken from the observed difference,
+  so for a *non-directional* claim compare the one-sided p-value to
+  $`\alpha/2`$ (this matches the interval, which excludes zero exactly
+  when $`p < \alpha/2`$).
 - **Other GDA packages.** The same calls work on a GDAtools `speMCA` /
   `csMCA` or an ade4 `dudi.pca` / `dudi.acm`; pass that object, and the
   grouping variable as a vector when it is not stored in the object.

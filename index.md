@@ -82,13 +82,13 @@ typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
 #> Cloud: n = 2000 individuals, dimensionality L = 2
 #>
 #>               category  n_c     D p_value sig notable
-#>  Exerce une profession 1049 0.279   0.000   *      no   # significant, but D < 0.4 (large n)
+#>  Exerce une profession 1049 0.279  <0.001   *      no   # significant, but D < 0.4 (large n)
 #>                Chomeur  134 0.129   0.305          no   # compatible with the whole cloud
-#>        Etudiant, eleve   94 0.973   0.000   *     yes   # strongly atypical
-#>               Retraite  392 0.537   0.000   *     yes
-#>    Retire des affaires   77 0.679   0.000   *     yes
-#>               Au foyer  171 0.388   0.000   *      no
-#>          Autre inactif   83 0.762   0.000   *     yes
+#>        Etudiant, eleve   94 0.973  <0.001   *     yes   # strongly atypical
+#>               Retraite  392 0.537  <0.001   *     yes
+#>    Retire des affaires   77 0.679  <0.001   *     yes
+#>               Au foyer  171 0.388  <0.001   *      no
+#>          Autre inactif   83 0.762  <0.001   *     yes
 #>
 #> * p <= 0.05   |   'notable': D >= 0.4   |   montecarlo
 

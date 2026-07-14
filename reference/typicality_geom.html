@@ -158,12 +158,31 @@ generalized Mahalanobis distance between the permuted mean point and <code>P</co
 When \(2^{n-1} \le\) <code>max_samples</code> the exact distribution is enumerated,
 otherwise <code>max_samples</code> sign patterns are drawn at random (Monte Carlo). The
 p-value is the proportion of permutations whose statistic is at least the
-observed one; in the one-dimensional case it is one-sided.</p>
+observed one; in the one-dimensional case it is one-sided. In the Monte
+Carlo case the add-one correction of Phipson &amp; Smyth (2010) is applied
+(\(p = (b + 1)/(B + 1)\), before the one-sided halving), so the estimated
+p-value is valid and never zero; exhaustive p-values are exact proportions.</p>
+<p><strong>One-sided convention (single axis).</strong> In the one-dimensional case the
+p-value is one-sided <em>in the direction of the observed deviation</em> (the
+book's convention). Because that direction is chosen from the data, a
+non-directional claim at level \(\alpha\) requires comparing the
+one-sided p-value to \(\alpha/2\); this matches the compatibility
+interval, which excludes the reference point exactly when
+\(p &lt; \alpha/2\).</p>
+<p><strong>Compatibility region and randomness.</strong> In dimension &gt; 1 the region is
+<em>adjusted</em> over <code>n_dir</code> random directions (Le Roux et al. 2019, §4.2.4),
+so \(\kappa\) varies slightly from run to run — even when the
+permutation distribution itself is exhaustive — unless <code>seed</code> is set.
+Increase <code>n_dir</code> to stabilise it.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Le Roux, B., Bienaise, S. &amp; Durand, J.-L. (2019).
 <em>Combinatorial Inference in Geometric Data Analysis</em>. Chapman &amp; Hall/CRC.</p>
+<p>Phipson, B. &amp; Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+<em>Statistical Applications in Genetics and Molecular Biology</em>, 9(1),
+Article 39.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -199,6 +218,8 @@ observed one; in the one-dimensional case it is one-sided.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Test statistic d2_obs  = 0.6471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Distribution    : exact (exhaustive enumeration), 512 samples</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> p-value         : 2 / 1,024 = 0.001953  (one-sided)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   (direction chosen from the data: for a non-directional claim,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    compare the one-sided p-value to alpha/2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95% compatibility : interval [0.8333 ; 2.467]</span>
 </code></pre></div>
     </div>
@@ -211,7 +232,7 @@ observed one; in the one-dimensional case it is one-sided.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

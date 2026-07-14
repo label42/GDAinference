@@ -204,7 +204,7 @@ turns this visual impression into a formal statement.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 0.9729  (D^2 = 0.9465)  -- notable deviation</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 100,000 samples</span></span>
-<span><span class="co">#&gt; p-value         : 0 / 100,000 = 0</span></span>
+<span><span class="co">#&gt; p-value         : (0 + 1) / (100,000 + 1) = 1e-05  (add-one corrected)</span></span>
 <span><span class="co">#&gt; 95% compatibility : principal ellipsoid, scale = 0.2456</span></span></code></pre></div>
 <p>The Mahalanobis distance is <code>D ≈ 0.97</code> — well above the
 0.4 <em>notable</em> limit — and the p-value is ≈ 0: among all groups of
@@ -236,13 +236,13 @@ plane:</p>
 <span><span class="co">#&gt; Cloud: n = 2000 individuals, dimensionality L = 2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;               category  n_c     D p_value sig notable</span></span>
-<span><span class="co">#&gt;  Exerce une profession 1049 0.279   0.000   *      no</span></span>
+<span><span class="co">#&gt;  Exerce une profession 1049 0.279  &lt;0.001   *      no</span></span>
 <span><span class="co">#&gt;                Chomeur  134 0.129   0.305          no</span></span>
-<span><span class="co">#&gt;        Etudiant, eleve   94 0.973   0.000   *     yes</span></span>
-<span><span class="co">#&gt;               Retraite  392 0.537   0.000   *     yes</span></span>
-<span><span class="co">#&gt;    Retire des affaires   77 0.679   0.000   *     yes</span></span>
-<span><span class="co">#&gt;               Au foyer  171 0.388   0.000   *      no</span></span>
-<span><span class="co">#&gt;          Autre inactif   83 0.762   0.000   *     yes</span></span>
+<span><span class="co">#&gt;        Etudiant, eleve   94 0.973  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;               Retraite  392 0.537  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;    Retire des affaires   77 0.679  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;               Au foyer  171 0.388  &lt;0.001   *      no</span></span>
+<span><span class="co">#&gt;          Autre inactif   83 0.762  &lt;0.001   *     yes</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * p &lt;= 0.05   |   'notable': D &gt;= 0.4   |   montecarlo</span></span></code></pre></div>
 <p>Read this table carefully — it contains the whole philosophy of the
@@ -322,7 +322,7 @@ instead of the FactoMineR one.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -119,14 +119,23 @@ every subset of \\n_c\\ points drawn from the \\n\\ reference points
 (where \\n_c\\ is the size of the group). When the number of such
 subsets, \\\binom{n}{n_c}\\, does not exceed `max_samples`, the exact
 exhaustive distribution is computed; otherwise `max_samples` subsets are
-drawn at random (Monte Carlo). The (inclusive) p-value is the proportion
-of subsets whose statistic is greater than or equal to the observed
-\\d^2\_{obs}\\.
+drawn at random (Monte Carlo). In the exhaustive case the (inclusive)
+p-value is the exact proportion of subsets whose statistic is greater
+than or equal to the observed \\d^2\_{obs}\\. In the Monte Carlo case
+the add-one correction of Phipson & Smyth (2010) is applied, \\p = (b +
+1)/(B + 1)\\ where \\b\\ is the number of sampled subsets at least as
+extreme as the observed statistic: a sampled permutation p-value can
+never legitimately be zero.
 
 ## References
 
 Le Roux, B., Bienaise, S. & Durand, J.-L. (2019). *Combinatorial
 Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
+
+Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+*Statistical Applications in Genetics and Molecular Biology*, 9(1),
+Article 39.
 
 ## See also
 

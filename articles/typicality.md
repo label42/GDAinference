@@ -130,7 +130,7 @@ students
 #> 
 #> Mahalanobis distance D = 0.9729  (D^2 = 0.9465)  -- notable deviation
 #> Distribution    : Monte Carlo, 100,000 samples
-#> p-value         : 0 / 100,000 = 0
+#> p-value         : (0 + 1) / (100,000 + 1) = 1e-05  (add-one corrected)
 #> 95% compatibility : principal ellipsoid, scale = 0.2456
 ```
 
@@ -170,13 +170,13 @@ typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
 #> Cloud: n = 2000 individuals, dimensionality L = 2
 #> 
 #>               category  n_c     D p_value sig notable
-#>  Exerce une profession 1049 0.279   0.000   *      no
+#>  Exerce une profession 1049 0.279  <0.001   *      no
 #>                Chomeur  134 0.129   0.305          no
-#>        Etudiant, eleve   94 0.973   0.000   *     yes
-#>               Retraite  392 0.537   0.000   *     yes
-#>    Retire des affaires   77 0.679   0.000   *     yes
-#>               Au foyer  171 0.388   0.000   *      no
-#>          Autre inactif   83 0.762   0.000   *     yes
+#>        Etudiant, eleve   94 0.973  <0.001   *     yes
+#>               Retraite  392 0.537  <0.001   *     yes
+#>    Retire des affaires   77 0.679  <0.001   *     yes
+#>               Au foyer  171 0.388  <0.001   *      no
+#>          Autre inactif   83 0.762  <0.001   *     yes
 #> 
 #> * p <= 0.05   |   'notable': D >= 0.4   |   montecarlo
 ```

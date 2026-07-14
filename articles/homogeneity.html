@@ -167,7 +167,7 @@ crowd near the centre. Let us turn these impressions into tests.</p>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.04462  -- notable difference</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 1.484  (D^2 = 2.203) between the mean points</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 10,000 arrangements</span></span>
-<span><span class="co">#&gt; p-value         : 0 / 10,000 = 0</span></span>
+<span><span class="co">#&gt; p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)</span></span>
 <span><span class="co">#&gt; 95% compatibility : principal kappa-ellipsoid, kappa = 0.2816</span></span></code></pre></div>
 <p>The mean points are far apart (<code>D ≈ 1.48</code>), the split is
 <em>notable</em> (<code>η² ≈ 0.045 ≥ 0.04</code>) and
@@ -207,9 +207,9 @@ difference</em>. Compare three pairs of groups:</p>
 <span>             notable <span class="op">=</span> <span class="va">r</span><span class="op">$</span><span class="va">notable</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                         comparison    D  eta2 p_value notable</span></span>
-<span><span class="co">#&gt; 1 Exerce une profession vs Chomeur 0.16 0.001  0.1961   FALSE</span></span>
-<span><span class="co">#&gt; 2             Au foyer vs Retraite 0.32 0.003  0.0023   FALSE</span></span>
-<span><span class="co">#&gt; 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0000    TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 Exerce une profession vs Chomeur 0.16 0.001  0.1962   FALSE</span></span>
+<span><span class="co">#&gt; 2             Au foyer vs Retraite 0.32 0.003  0.0024   FALSE</span></span>
+<span><span class="co">#&gt; 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0001    TRUE</span></span></code></pre></div>
 <p>Three contrasting situations, the whole point of the method:</p>
 <ul>
 <li>
@@ -253,7 +253,7 @@ groups alone:</p>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.1936  -- notable difference</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 1.527  (D^2 = 2.332) between the mean points</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 10,000 arrangements</span></span>
-<span><span class="co">#&gt; p-value         : 0 / 10,000 = 0</span></span>
+<span><span class="co">#&gt; p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)</span></span>
 <span><span class="co">#&gt; 95% compatibility : principal kappa-ellipsoid, kappa = 0.2834</span></span></code></pre></div>
 <p>The conclusion is unchanged (<code>p ≈ 0</code>), but the effect size
 jumps from <code>η² ≈ 0.045</code> to <code>≈ 0.19</code>. The reason is
@@ -288,7 +288,7 @@ test of one group against their union.</p>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.03097  -- small (&lt; notable limit 0.04)</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 0.5391  (D^2 = 0.2906) between the mean points</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 10,000 arrangements</span></span>
-<span><span class="co">#&gt; p-value         : 0 / 10,000 = 0</span></span>
+<span><span class="co">#&gt; p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)</span></span>
 <span><span class="co">#&gt; 95% compatibility : principal kappa-ellipsoid, kappa = 0.1102</span></span></code></pre></div>
 <p>Here <code>p ≈ 0</code> but <code>η² ≈ 0.03</code> (significant, not
 notable): a small but real gap. Crucially it lies along <strong>axis
@@ -319,7 +319,7 @@ single deviation, hence no region):</p>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.1104  -- notable difference</span></span>
 <span><span class="co">#&gt; Between-group M-variance V_M = 0.1976</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 10,000 arrangements</span></span>
-<span><span class="co">#&gt; p-value         : 0 / 10,000 = 0</span></span></code></pre></div>
+<span><span class="co">#&gt; p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)</span></span></code></pre></div>
 <p><code>η² ≈ 0.11</code> of the cloud’s variance lies between the
 activity-status groups, and <code>p ≈ 0</code>: the groups are strongly
 heterogeneous overall. This is the homogeneity counterpart of an omnibus
@@ -365,7 +365,11 @@ what we interpreted; pass <code>axes = NULL</code> (with
 <strong>One dimension.</strong> On a single axis the test becomes a
 signed, one-sided comparison of the two group means, with an exact
 compatibility <em>interval</em> – useful to test a contrast on one
-interpreted axis.</li>
+interpreted axis. The direction is taken from the observed difference,
+so for a <em>non-directional</em> claim compare the one-sided p-value to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">\alpha/2</annotation></semantics></math>
+(this matches the interval, which excludes zero exactly when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mi>α</mi><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">p &lt; \alpha/2</annotation></semantics></math>).</li>
 <li>
 <strong>Other GDA packages.</strong> The same calls work on a
 GDAtools <code>speMCA</code> / <code>csMCA</code> or an ade4
@@ -391,7 +395,7 @@ grouping variable as a vector when it is not stored in the object.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

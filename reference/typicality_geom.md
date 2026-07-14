@@ -112,12 +112,34 @@ and `P`. When \\2^{n-1} \le\\ `max_samples` the exact distribution is
 enumerated, otherwise `max_samples` sign patterns are drawn at random
 (Monte Carlo). The p-value is the proportion of permutations whose
 statistic is at least the observed one; in the one-dimensional case it
-is one-sided.
+is one-sided. In the Monte Carlo case the add-one correction of Phipson
+& Smyth (2010) is applied (\\p = (b + 1)/(B + 1)\\, before the one-sided
+halving), so the estimated p-value is valid and never zero; exhaustive
+p-values are exact proportions.
+
+**One-sided convention (single axis).** In the one-dimensional case the
+p-value is one-sided *in the direction of the observed deviation* (the
+book's convention). Because that direction is chosen from the data, a
+non-directional claim at level \\\alpha\\ requires comparing the
+one-sided p-value to \\\alpha/2\\; this matches the compatibility
+interval, which excludes the reference point exactly when \\p \<
+\alpha/2\\.
+
+**Compatibility region and randomness.** In dimension \> 1 the region is
+*adjusted* over `n_dir` random directions (Le Roux et al. 2019, §4.2.4),
+so \\\kappa\\ varies slightly from run to run — even when the
+permutation distribution itself is exhaustive — unless `seed` is set.
+Increase `n_dir` to stabilise it.
 
 ## References
 
 Le Roux, B., Bienaise, S. & Durand, J.-L. (2019). *Combinatorial
 Inference in Geometric Data Analysis*. Chapman & Hall/CRC.
+
+Phipson, B. & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+*Statistical Applications in Genetics and Molecular Biology*, 9(1),
+Article 39.
 
 ## See also
 
@@ -154,5 +176,7 @@ typicality_geom(Student, point = 0)
 #> Test statistic d2_obs  = 0.6471
 #> Distribution    : exact (exhaustive enumeration), 512 samples
 #> p-value         : 2 / 1,024 = 0.001953  (one-sided)
+#>   (direction chosen from the data: for a non-directional claim,
+#>    compare the one-sided p-value to alpha/2)
 #> 95% compatibility : interval [0.8333 ; 2.467]
 ```

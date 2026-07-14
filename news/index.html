@@ -39,6 +39,20 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="gdainference-0009000-development-version">GDAinference 0.0.0.9000 (development version)<a class="anchor" aria-label="anchor" href="#gdainference-0009000-development-version"></a></h2>
+<div class="section level3">
+<h3 id="statistical-fixes-audit-0-0-0-9000">Statistical fixes (audit)<a class="anchor" aria-label="anchor" href="#statistical-fixes-audit-0-0-0-9000"></a></h3>
+<ul><li>
+<strong>Monte Carlo p-values now use the add-one correction of Phipson &amp; Smyth (2010)</strong>: <code>p = (b + 1) / (B + 1)</code>. A sampled permutation p-value can therefore never be zero and the test keeps its nominal level near decision thresholds. Exhaustive p-values are unchanged (exact proportions); all the book’s golden-master values still reproduce. Monte Carlo p-values obtained with earlier versions were <code>n_sup / max_samples</code> and shift slightly. <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> marks corrected p-values, and <code><a href="../reference/print.typicality_byvar.html">print.typicality_byvar()</a></code> shows tiny p-values as a bound (e.g. <code>&lt;0.001</code>) instead of <code>0.000</code>.</li>
+<li>Index-style <code>group</code> arguments are now validated: duplicated, negative, fractional or out-of-range indices are rejected with informative errors. Previously a numeric grouping variable passed without <code>level</code> was silently treated as row indices (duplicating rows).</li>
+<li>The rank of a cloud is now detected with a tolerance <em>relative</em> to the largest eigenvalue, so all results are invariant under a rescaling of the coordinates (small-scale coordinates were spuriously declared degenerate).</li>
+<li>
+<code><a href="../reference/typicality_geom.html">typicality_geom()</a></code> on a rank-deficient cloud spanning several axes (<code>L &lt; K</code>): the compatibility region is now the kappa form consistent with the two-sided p-value; previously an axis-1 interval was paired with a two-sided test. A warning now also flags linearly dependent axes in <code><a href="../reference/typicality_geom.html">typicality_geom()</a></code> and <code><a href="../reference/homogeneity.html">homogeneity()</a></code> (as it already did in <code><a href="../reference/typicality_comb.html">typicality_comb()</a></code>).</li>
+<li>One-sided one-dimensional tests (<code><a href="../reference/typicality_geom.html">typicality_geom()</a></code>, two-group <code><a href="../reference/homogeneity.html">homogeneity()</a></code> on a single axis) now document and print that the direction is taken from the data: compare the one-sided p-value to <code>alpha/2</code> for a non-directional claim (this matches the compatibility interval).</li>
+<li>Compatibility-region internals: a materially negative discriminant in the two-group homogeneity region (possible in degenerate configurations) no longer fabricates finite roots; the affected nesting is treated as non-informative. The geometric region’s discriminant is clamped at zero (it is non-negative by construction).</li>
+<li>Setting <code>seed</code> no longer mutates the caller’s global RNG state: the stream is restored after each call. Seeded results are unchanged.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="initial-release-0-0-0-9000">Initial release<a class="anchor" aria-label="anchor" href="#initial-release-0-0-0-9000"></a></h3>
 <ul><li>Initial scaffolding of the package.</li>
 <li>
 <code><a href="../reference/get_coord.html">get_coord()</a></code>: compatibility layer extracting principal coordinates from matrices/data frames and from FactoMineR, GDAtools and ade4 result objects.</li>
@@ -60,7 +74,9 @@
 <li>Compatibility documented and backed by integration tests: formally tested on FactoMineR (<code>PCA</code>, <code>MCA</code>), GDAtools (<code>speMCA</code>, <code>csMCA</code>) and ade4 (<code>dudi.pca</code>, <code>dudi.acm</code>); other similarly-structured GDA objects are expected to work but are not yet formally tested.</li>
 <li>Bundled example data sets: <code>Target</code>, <code>Target_group</code>, <code>Student</code>.</li>
 </ul></div>
-  </main></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
@@ -68,7 +84,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
