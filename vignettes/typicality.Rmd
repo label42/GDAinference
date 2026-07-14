@@ -186,6 +186,47 @@ Read this table carefully — it contains the whole philosophy of the method:
 This three-way reading — *compatible* / *significant-but-small* / *notable and
 significant* — is exactly what combinatorial inference is meant to support.
 
+## The v-test on a supplementary category: what's the difference?
+
+Readers used to FactoMineR will know another indicator attached to a
+supplementary category: the **v-test** (*valeur-test*). It answers the *same*
+underlying question — could this category's mean point be that of a random
+subset of the individuals? — so it is worth seeing exactly how the two relate.
+Here are the v-tests of the occupation groups on the first two axes:
+
+```{r vtest}
+round(mca$quali.sup$v.test[levels(d$occupation), 1:2], 2)
+```
+
+The v-test is, in effect, the approximate, one-axis ancestor of the typicality
+test (the book discusses it in §3.2.6). Three things separate them:
+
+* **Axis by axis vs. multidimensional.** A v-test is computed per axis, so a
+  group gets one number per dimension (and testing several axes raises an
+  implicit multiple-comparison problem). The typicality test works on the
+  deviation *in the plane* (or any subspace), with the Mahalanobis metric of
+  the cloud: one test for the position the eye actually reads on the map.
+* **Approximate vs. exact.** The v-test relies on a normal approximation of
+  the mean of a random subset (hypergeometric sampling); the typicality test
+  computes the actual combinatorial distribution, exhaustively or by Monte
+  Carlo.
+* **Significance vs. magnitude, again.** The magnitude of a v-test conflates
+  the size of the deviation with the size of the group — it grows like
+  $\sqrt{n_c}$ — and it comes with no effect size and no compatibility
+  region. The typicality test separates the two (`D` alongside `p`) and
+  returns the region.
+
+The table above makes the third point concrete. Ranked by v-test on axis 1,
+**Employed** (13.1) beats **Student** (7.4) — it looks like the most
+strikingly positioned group of all. Yet the typicality table showed Employed
+at `D = 0.28` (significant but *not* notable) against Student's `D = 0.97`:
+the employed simply outnumber everyone (n = 1049), so even their minute
+displacement produces a huge v-test. Conversely, **Unemployed** (v-tests 1.4
+and 0.6, both below the conventional |2| threshold) agrees with the
+typicality verdict `p ≈ 0.31`: the two approaches converge where the
+approximation is comfortable, and the typicality test adds the exactness, the
+multidimensional reading and the effect size where it matters.
+
 ## Practical notes
 
 * **Which axes?** The test runs in the subspace you pass through `axes`. Here we
