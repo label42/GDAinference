@@ -72,23 +72,53 @@
     
     
 <div class="section level2">
-<h2 id="what-this-tutorial-is-about">What this tutorial is about<a class="anchor" aria-label="anchor" href="#what-this-tutorial-is-about"></a>
+<h2 id="why-inference-in-gda">Why inference in GDA?<a class="anchor" aria-label="anchor" href="#why-inference-in-gda"></a>
 </h2>
-<p>Geometric Data Analysis (MCA, PCA, CA, …) builds a <em>cloud of
-individuals</em> and lets us describe oppositions between groups. But
-description alone leaves a question open: when a group’s mean point sits
-away from the centre of the cloud, <strong>is that a genuine effect, or
-could it just be the luck of the draw?</strong></p>
-<p><code>GDAinference</code> answers this with the <strong>combinatorial
-typicality test</strong> of Le Roux, Bienaise &amp; Durand (2019). It is
-a <em>permutation</em> test, so it makes no assumption about the
-distribution of the data: it compares the group’s observed position to
-what would happen for <em>all possible</em> groups of the same size
-drawn from the cloud. It returns two things:</p>
+<p>Geometric Data Analysis — MCA, PCA, CA and their variants —
+represents the individuals of a data table as a <em>cloud of
+points</em>: individuals with similar profiles are close to one another,
+dissimilar ones far apart. The principal axes of the cloud summarise the
+main oppositions in the data, and supplementary variables (sex, age,
+occupation, …) can be projected onto the cloud to locate groups of
+individuals within it. In practice the principal axes are often read as
+underlying dimensions structuring the data — much as one would read
+latent variables — although GDA itself stays deliberately closer to the
+data: the cloud, not a hypothesised construct, is the object under
+study.</p>
+<p>The traditional way of interpreting such an analysis is
+descriptive:</p>
+<ol style="list-style-type: decimal">
+<li>give meaning to the axes, from the categories that contribute most
+to them;</li>
+<li>project the supplementary categories and read the <em>oppositions
+between groups</em> — “students lie on the side of numerous,
+urban-cultural practices; the retired on the opposite side”;</li>
+<li>sometimes, back this reading with the axis-by-axis indicators
+offered by some GDA software (test values based on a normal/chi-squared
+approximation).</li>
+</ol>
+<p>This workflow leaves one question unanswered. A group’s mean point
+<em>always</em> deviates somewhat from the centre of the cloud, so the
+deviation one sees proves nothing by itself: could a deviation of that
+size arise for a randomly drawn subset of the same size — sampling
+variability, in classical terms — or is the group genuinely located
+elsewhere than the rest of the cloud? The eye cannot decide, and the
+axis-by-axis indicators answer only axis by axis, and only
+approximately, whereas the deviation is a genuinely multidimensional
+quantity: a group can be unremarkable on each axis taken separately yet
+occupy a remarkable position in the plane.</p>
+<p>The <strong>combinatorial typicality test</strong> of Le Roux,
+Bienaise &amp; Durand (2019), which <code>GDAinference</code>
+implements, answers that question exactly. It is a <em>permutation</em>
+test, so it makes no assumption about the distribution of the data: it
+compares the group’s observed deviation with the deviation of <em>all
+possible</em> groups of the same size drawn from the cloud. It returns
+two things:</p>
 <ul>
 <li>a <strong>p-value</strong> — the proportion of random groups that
 deviate at least as much as the observed one (small p ⇒ the group is
-<em>atypical</em>);</li>
+<em>atypical</em>: it cannot be assimilated to a random subset of the
+cloud);</li>
 <li>a <strong>compatibility region</strong> — an ellipse showing where
 the group mean could plausibly lie.</li>
 </ul>
@@ -103,23 +133,30 @@ a rule of thumb the deviation is called <em>notable</em> when
 <h2 id="the-data-and-the-mca">The data and the MCA<a class="anchor" aria-label="anchor" href="#the-data-and-the-mca"></a>
 </h2>
 <p>We use <code>hdv2003</code> from <strong>questionr</strong> (2000
-respondents to the French “Histoire de vie” survey) and seven yes/no
-cultural and leisure practices. We build a standard MCA with
-<strong>FactoMineR</strong>, adding <code>sexe</code> and
-<code>occup</code> (activity status) as supplementary variables and
-<code>age</code> as a supplementary numeric variable, so they do not
-shape the cloud but can be located on it.</p>
+respondents to the French “Histoire de vie” survey, 2003) and seven
+yes/no leisure practices. The variables carry French names and labels,
+so we first relabel them in English:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://label42.github.io/GDAinference/">GDAinference</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://factominer.free.fr" class="external-link">FactoMineR</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"hdv2003"</span>, package <span class="op">=</span> <span class="st">"questionr"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">active</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>,</span>
-<span>            <span class="st">"cuisine"</span>, <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span><span class="op">)</span></span>
-<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">active</span>, <span class="st">"sexe"</span>, <span class="st">"occup"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">mca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/MCA.html" class="external-link">MCA</a></span><span class="op">(</span><span class="va">d</span>, quali.sup <span class="op">=</span> <span class="fl">8</span><span class="op">:</span><span class="fl">9</span>, quanti.sup <span class="op">=</span> <span class="fl">10</span>, ncp <span class="op">=</span> <span class="cn">Inf</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>, <span class="st">"cuisine"</span>,</span>
+<span>                 <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"sexe"</span>, <span class="st">"occup"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"comics"</span>, <span class="st">"fishing.hunting"</span>, <span class="st">"cooking"</span>,</span>
+<span>              <span class="st">"DIY"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"sex"</span>, <span class="st">"occupation"</span>, <span class="st">"age"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">[[</span><span class="va">v</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">sex</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Man"</span>, <span class="st">"Woman"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">occupation</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Employed"</span>, <span class="st">"Unemployed"</span>, <span class="st">"Student"</span>, <span class="st">"Retired"</span>,</span>
+<span>                          <span class="st">"Retired from business"</span>, <span class="st">"Homemaker"</span>,</span>
+<span>                          <span class="st">"Other inactive"</span><span class="op">)</span></span></code></pre></div>
+<p>We build a standard MCA of the seven practices with
+<strong>FactoMineR</strong>, adding <code>sex</code> and
+<code>occupation</code> as supplementary categorical variables and
+<code>age</code> as a supplementary numeric variable, so they do not
+shape the cloud but can be located on it:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/MCA.html" class="external-link">MCA</a></span><span class="op">(</span><span class="va">d</span>, quali.sup <span class="op">=</span> <span class="fl">8</span><span class="op">:</span><span class="fl">9</span>, quanti.sup <span class="op">=</span> <span class="fl">10</span>, ncp <span class="op">=</span> <span class="cn">Inf</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mca</span><span class="op">$</span><span class="va">eig</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       eigenvalue percentage of variance cumulative percentage of variance</span></span>
 <span><span class="co">#&gt; dim 1       0.21                  21.22                             21.22</span></span>
@@ -135,72 +172,48 @@ the plane, not the percentages.)</p>
 </h2>
 <p>Before testing anything, we must understand what the axes
 <em>mean</em> — otherwise a p-value is just a number. The map below
-shows the active categories (grey) and the activity-status groups
-(orange).</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cats</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">coord</span>, <span class="va">type</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">coord</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"D1"</span>, <span class="st">"D2"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, D1 <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">D1</span>, D2 <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">D2</span>, type <span class="op">=</span> <span class="va">type</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
-<span>  <span class="fu">cats</span><span class="op">(</span><span class="va">mca</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="va">coord</span>, <span class="st">"leisure category"</span><span class="op">)</span>,</span>
-<span>  <span class="fu">cats</span><span class="op">(</span><span class="va">mca</span><span class="op">$</span><span class="va">quali.sup</span><span class="op">$</span><span class="va">coord</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">hdv2003</span><span class="op">$</span><span class="va">occup</span><span class="op">)</span>, <span class="op">]</span>, <span class="st">"occupation"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">map</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">D1</span>, <span class="va">D2</span>, colour <span class="op">=</span> <span class="va">type</span>, label <span class="op">=</span> <span class="va">label</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, colour <span class="op">=</span> <span class="st">"grey85"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, colour <span class="op">=</span> <span class="st">"grey85"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="co"># thin out the leisure labels, but always show the (few) occupation labels</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">map</span>, <span class="va">type</span> <span class="op">==</span> <span class="st">"leisure category"</span><span class="op">)</span>,</span>
-<span>            size <span class="op">=</span> <span class="fl">2.8</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.7</span>, check_overlap <span class="op">=</span> <span class="cn">TRUE</span>, show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">map</span>, <span class="va">type</span> <span class="op">==</span> <span class="st">"occupation"</span><span class="op">)</span>,</span>
-<span>            size <span class="op">=</span> <span class="fl">3</span>, fontface <span class="op">=</span> <span class="st">"bold"</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"leisure category"</span> <span class="op">=</span> <span class="st">"grey45"</span>,</span>
-<span>                                 <span class="st">"occupation"</span> <span class="op">=</span> <span class="st">"#D95F02"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fl">0.18</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fl">0.08</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_equal</a></span><span class="op">(</span>clip <span class="op">=</span> <span class="st">"off"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Axis 1 (volume of practices)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Axis 2 (outdoor vs. urban-cultural)"</span>, colour <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="typicality_files/figure-html/map-1.png" class="r-plt" alt="Map of the first MCA plane: active categories and occupation groups." width="672" style="display: block; margin: auto;"></p>
+shows the active categories (red) and the supplementary categories
+(green), among which the occupation groups:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mca</span>, invisible <span class="op">=</span> <span class="st">"ind"</span>, cex <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<p><img src="typicality_files/figure-html/map-1.png" class="r-plt" alt="Map of the first MCA plane: active categories and supplementary categories." width="672" style="display: block; margin: auto;"></p>
 <p>Two clear oppositions emerge:</p>
 <ul>
 <li>
 <strong>Axis 1 — the <em>volume</em> of practices.</strong> On the
-right sit the “Oui” categories (<code>hard.rock</code>,
-<code>lecture.bd</code>, <code>sport</code>, <code>cinema</code>); on
-the left, the “Non” categories. The right means <em>does many
-things</em>, the left <em>does few</em>. The supplementary variable
-<code>age</code> correlates −0.44 with this axis: <strong>older
-respondents are on the left</strong> (fewer practices), younger on the
-right.</li>
+right sit the “Yes” categories (<code>hard.rock_Yes</code>,
+<code>comics_Yes</code>, <code>sport_Yes</code>,
+<code>cinema_Yes</code>); on the left, the “No” categories. The right
+means <em>does many things</em>, the left <em>does few</em>. The
+supplementary variable <code>age</code> correlates −0.44 with this axis:
+<strong>older respondents are on the left</strong> (fewer practices),
+younger on the right.</li>
 <li>
 <strong>Axis 2 — the <em>kind</em> of practice.</strong> At the top,
-outdoor/manual leisure (<code>peche.chasse</code> stands out, with
-<code>bricol</code>); at the bottom, urban-cultural leisure
-(<code>lecture.bd</code>, <code>cinema</code>,
-<code>hard.rock</code>).</li>
+outdoor/manual leisure (<code>fishing.hunting_Yes</code> stands out,
+with <code>DIY_Yes</code>); at the bottom, urban-cultural leisure
+(<code>comics_Yes</code>, <code>cinema_Yes</code>,
+<code>hard.rock_Yes</code>).</li>
 </ul>
-<p>The orange occupation points already tell a story:
-<strong>students</strong> sit far to the lower right (young, many and
-urban-cultural practices), <strong>retired</strong> people to the left
-(older, fewer practices), while the <strong>employed</strong> and the
-<strong>unemployed</strong> sit close to the centre. Typicality testing
-turns this visual impression into a formal statement.</p>
+<p>The occupation points already tell a story: <strong>students</strong>
+sit far to the lower right (young, many and urban-cultural practices),
+<strong>retired</strong> people to the left (older, fewer practices),
+while the <strong>employed</strong> and the <strong>unemployed</strong>
+sit close to the centre. Typicality testing turns this visual impression
+into a formal statement.</p>
 </div>
 <div class="section level2">
 <h2 id="a-first-test-are-students-atypical">A first test: are students atypical?<a class="anchor" aria-label="anchor" href="#a-first-test-are-students-atypical"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">students</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/typicality_comb.html">typicality_comb</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, level <span class="op">=</span> <span class="st">"Etudiant, eleve"</span>,</span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">students</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/typicality_comb.html">typicality_comb</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>, level <span class="op">=</span> <span class="st">"Student"</span>,</span>
 <span>                            axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">students</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Combinatorial typicality test (mean point)</span></span>
 <span><span class="co">#&gt; ------------------------------------------</span></span>
 <span><span class="co">#&gt; Reference cloud : n = 2000 points, dimensionality L = 2</span></span>
-<span><span class="co">#&gt; Group cloud     : n_c = 94 points</span></span>
+<span><span class="co">#&gt; Group cloud     : occupation = "Student", n_c = 94 points</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 0.9729  (D^2 = 0.9465)  -- notable deviation</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 100,000 samples</span></span>
@@ -213,7 +226,7 @@ as much as the students do. Students are <strong>atypical</strong>, and
 the map tells us <em>how</em>: they are pulled toward the “young / many
 / urban-cultural” corner.</p>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method makes this geometric:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">students</span><span class="op">)</span></span></code></pre></div>
 <p><img src="typicality_files/figure-html/students-plot-1.png" class="r-plt" alt="Compatibility ellipse for the students' mean point." width="672" style="display: block; margin: auto;"></p>
 <p>The dashed ellipse is the <strong>95% compatibility region</strong>
@@ -222,49 +235,49 @@ centre <strong>G</strong> (black) lies far outside it, which is the
 geometric face of <code>p &lt; 0.05</code>. Notice how <em>small</em>
 the ellipse is: with 2000 individuals the mean is pinned down very
 precisely, so even moderate deviations become detectable. More data ⇒
-smaller region ⇒ easier to certify a genuine effect.</p>
+smaller region ⇒ easier to certify that a deviation is not one that a
+random subset could produce.</p>
 </div>
 <div class="section level2">
-<h2 id="the-key-lesson-significant-is-not-notable">The key lesson: <em>significant</em> is not <em>notable</em><a class="anchor" aria-label="anchor" href="#the-key-lesson-significant-is-not-notable"></a>
+<h2 id="significant-is-not-notable">
+<em>Significant</em> is not <em>notable</em><a class="anchor" aria-label="anchor" href="#significant-is-not-notable"></a>
 </h2>
-<p>Let us now test every activity-status group at once, on the
-plane:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/typicality_byvar.html">typicality_byvar</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occup"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<p>Let us now test every occupation group at once, on the plane:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/typicality_byvar.html">typicality_byvar</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occupation"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Combinatorial typicality test by category of 'occup'</span></span>
+<span><span class="co">#&gt; Combinatorial typicality test by category of 'occupation'</span></span>
 <span><span class="co">#&gt; Cloud: n = 2000 individuals, dimensionality L = 2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;               category  n_c     D p_value sig notable</span></span>
-<span><span class="co">#&gt;  Exerce une profession 1049 0.279  &lt;0.001   *      no</span></span>
-<span><span class="co">#&gt;                Chomeur  134 0.129   0.305          no</span></span>
-<span><span class="co">#&gt;        Etudiant, eleve   94 0.973  &lt;0.001   *     yes</span></span>
-<span><span class="co">#&gt;               Retraite  392 0.537  &lt;0.001   *     yes</span></span>
-<span><span class="co">#&gt;    Retire des affaires   77 0.679  &lt;0.001   *     yes</span></span>
-<span><span class="co">#&gt;               Au foyer  171 0.388  &lt;0.001   *      no</span></span>
-<span><span class="co">#&gt;          Autre inactif   83 0.762  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;               Employed 1049 0.279  &lt;0.001   *      no</span></span>
+<span><span class="co">#&gt;             Unemployed  134 0.129   0.305          no</span></span>
+<span><span class="co">#&gt;                Student   94 0.973  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;                Retired  392 0.537  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;  Retired from business   77 0.679  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;              Homemaker  171 0.388  &lt;0.001   *      no</span></span>
+<span><span class="co">#&gt;         Other inactive   83 0.762  &lt;0.001   *     yes</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * p &lt;= 0.05   |   'notable': D &gt;= 0.4   |   montecarlo</span></span></code></pre></div>
 <p>Read this table carefully — it contains the whole philosophy of the
 method:</p>
 <ul>
 <li>
-<strong>Chômeur</strong> (unemployed): <code>D ≈ 0.13</code>, p ≈
-0.31. The deviation is tiny <em>and</em> not significant: the unemployed
-are <strong>compatible</strong> with the cloud as a whole — on this
-plane they look like everyone else (they sit near the centre).</li>
+<strong>Unemployed</strong>: <code>D ≈ 0.13</code>, p ≈ 0.31. The
+deviation is tiny <em>and</em> not significant: the unemployed are
+<strong>compatible</strong> with the cloud as a whole — on this plane
+they look like everyone else (they sit near the centre).</li>
 <li>
-<strong>Exerce une profession</strong> (employed) and <strong>Au
-foyer</strong> (homemakers): <code>p ≈ 0</code>, yet
-<code>D &lt; 0.4</code>. These deviations are <strong>statistically
-significant but descriptively small</strong>. With n = 1049 employed
-respondents, the test detects a real but minute displacement. This is
-the large-sample caveat that the <em>notable</em> threshold is designed
-to catch: <strong>do not mistake a significant p-value for an important
-effect.</strong> Always read <code>D</code> alongside
-<code>p</code>.</li>
+<strong>Employed</strong> and <strong>Homemaker</strong>:
+<code>p ≈ 0</code>, yet <code>D &lt; 0.4</code>. These deviations are
+<strong>statistically significant but descriptively small</strong>. With
+n = 1049 employed respondents, the test detects a real but minute
+displacement. This is the large-sample caveat that the <em>notable</em>
+threshold is designed to catch: <strong>do not mistake a significant
+p-value for an important effect.</strong> Always read <code>D</code>
+alongside <code>p</code>.</li>
 <li>
-<strong>Students, retired, “retired from business”, other
+<strong>Student, Retired, Retired from business, Other
 inactive</strong>: both <code>notable</code> (<code>D ≥ 0.4</code>)
 <strong>and</strong> significant. These are the genuinely atypical
 groups — and, reading the map, they are atypical in <em>opposite</em>
@@ -274,6 +287,64 @@ active).</li>
 <p>This three-way reading — <em>compatible</em> /
 <em>significant-but-small</em> / <em>notable and significant</em> — is
 exactly what combinatorial inference is meant to support.</p>
+</div>
+<div class="section level2">
+<h2 id="the-v-test-on-a-supplementary-category-whats-the-difference">The v-test on a supplementary category: what’s the difference?<a class="anchor" aria-label="anchor" href="#the-v-test-on-a-supplementary-category-whats-the-difference"></a>
+</h2>
+<p>Readers used to FactoMineR will know another indicator attached to a
+supplementary category: the <strong>v-test</strong>
+(<em>valeur-test</em>). It answers the <em>same</em> underlying question
+— could this category’s mean point be that of a random subset of the
+individuals? — so it is worth seeing exactly how the two relate. Here
+are the v-tests of the occupation groups on the first two axes:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mca</span><span class="op">$</span><span class="va">quali.sup</span><span class="op">$</span><span class="va">v.test</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">occupation</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                        Dim 1 Dim 2</span></span>
+<span><span class="co">#&gt; Employed               13.08 -0.06</span></span>
+<span><span class="co">#&gt; Unemployed              1.44  0.55</span></span>
+<span><span class="co">#&gt; Student                 7.40 -6.21</span></span>
+<span><span class="co">#&gt; Retired               -11.30  3.61</span></span>
+<span><span class="co">#&gt; Retired from business  -5.97  1.15</span></span>
+<span><span class="co">#&gt; Homemaker              -5.05 -1.63</span></span>
+<span><span class="co">#&gt; Other inactive         -7.09  0.05</span></span></code></pre></div>
+<p>The v-test is, in effect, the approximate, one-axis ancestor of the
+typicality test (the book discusses it in §3.2.6). Three things separate
+them:</p>
+<ul>
+<li>
+<strong>Axis by axis vs. multidimensional.</strong> A v-test is
+computed per axis, so a group gets one number per dimension (and testing
+several axes raises an implicit multiple-comparison problem). The
+typicality test works on the deviation <em>in the plane</em> (or any
+subspace), with the Mahalanobis metric of the cloud: one test for the
+position the eye actually reads on the map.</li>
+<li>
+<strong>Approximate vs. exact.</strong> The v-test relies on a
+normal approximation of the mean of a random subset (hypergeometric
+sampling); the typicality test computes the actual combinatorial
+distribution, exhaustively or by Monte Carlo.</li>
+<li>
+<strong>Significance vs. magnitude, again.</strong> The magnitude of
+a v-test conflates the size of the deviation with the size of the group
+— it grows like
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><msub><mi>n</mi><mi>c</mi></msub></msqrt><annotation encoding="application/x-tex">\sqrt{n_c}</annotation></semantics></math>
+— and it comes with no effect size and no compatibility region. The
+typicality test separates the two (<code>D</code> alongside
+<code>p</code>) and returns the region.</li>
+</ul>
+<p>The table above makes the third point concrete. Ranked by v-test on
+axis 1, <strong>Employed</strong> (13.1) beats <strong>Student</strong>
+(7.4) — it looks like the most strikingly positioned group of all. Yet
+the typicality table showed Employed at <code>D = 0.28</code>
+(significant but <em>not</em> notable) against Student’s
+<code>D = 0.97</code>: the employed simply outnumber everyone (n =
+1049), so even their minute displacement produces a huge v-test.
+Conversely, <strong>Unemployed</strong> (v-tests 1.4 and 0.6, both below
+the conventional |2| threshold) agrees with the typicality verdict
+<code>p ≈ 0.31</code>: the two approaches converge where the
+approximation is comfortable, and the typicality test adds the
+exactness, the multidimensional reading and the effect size where it
+matters.</p>
 </div>
 <div class="section level2">
 <h2 id="practical-notes">Practical notes<a class="anchor" aria-label="anchor" href="#practical-notes"></a>
@@ -288,9 +359,9 @@ the deviation in the <em>full</em> cloud, keep all axes
 <code>axes = NULL</code>.</li>
 <li>
 <strong>Naming vs. passing a variable.</strong> Because
-<code>occup</code> is stored in the MCA object, we referred to it by
-name (<code>"occup"</code>). You can equally pass the vector
-(<code>group = hdv2003$occup</code>), which is the way to go for objects
+<code>occupation</code> is stored in the MCA object, we referred to it
+by name (<code>"occupation"</code>). You can equally pass the vector
+(<code>group = d$occupation</code>), which is the way to go for objects
 that do not store the variable (e.g. GDAtools <code>speMCA</code>).</li>
 <li>
 <strong>Exact vs. Monte Carlo.</strong> With small clouds the test

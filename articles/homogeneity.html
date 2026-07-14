@@ -111,32 +111,38 @@ the means.</li>
 </h2>
 <p>We reuse the MCA of the <code><a href="../articles/typicality.html">vignette("typicality")</a></code>: 2000
 respondents of the French “Histoire de vie” survey
-(<code><a href="https://juba.github.io/questionr/reference/hdv2003.html" class="external-link">questionr::hdv2003</a></code>) and seven leisure practices, with
-<code>sexe</code> and <code>occup</code> (activity status) as
-supplementary variables.</p>
+(<code><a href="https://juba.github.io/questionr/reference/hdv2003.html" class="external-link">questionr::hdv2003</a></code>) and seven leisure practices
+(relabelled in English), with <code>sex</code> and
+<code>occupation</code> as supplementary variables.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://label42.github.io/GDAinference/">GDAinference</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://factominer.free.fr" class="external-link">FactoMineR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"hdv2003"</span>, package <span class="op">=</span> <span class="st">"questionr"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">active</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>,</span>
-<span>            <span class="st">"cuisine"</span>, <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span><span class="op">)</span></span>
-<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">active</span>, <span class="st">"sexe"</span>, <span class="st">"occup"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>, <span class="st">"cuisine"</span>,</span>
+<span>                 <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"sexe"</span>, <span class="st">"occup"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"comics"</span>, <span class="st">"fishing.hunting"</span>, <span class="st">"cooking"</span>,</span>
+<span>              <span class="st">"DIY"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"sex"</span>, <span class="st">"occupation"</span>, <span class="st">"age"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">[[</span><span class="va">v</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">sex</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Man"</span>, <span class="st">"Woman"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">occupation</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Employed"</span>, <span class="st">"Unemployed"</span>, <span class="st">"Student"</span>, <span class="st">"Retired"</span>,</span>
+<span>                          <span class="st">"Retired from business"</span>, <span class="st">"Homemaker"</span>,</span>
+<span>                          <span class="st">"Other inactive"</span><span class="op">)</span></span>
 <span><span class="va">mca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/MCA.html" class="external-link">MCA</a></span><span class="op">(</span><span class="va">d</span>, quali.sup <span class="op">=</span> <span class="fl">8</span><span class="op">:</span><span class="fl">9</span>, quanti.sup <span class="op">=</span> <span class="fl">10</span>, ncp <span class="op">=</span> <span class="cn">Inf</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>On the first plane, <strong>axis 1</strong> is the <em>volume</em> of
 practices (few on the left, many on the right; older respondents on the
 left) and <strong>axis 2</strong> opposes <em>outdoor/manual</em>
 leisure (top) to <em>urban-cultural</em> leisure (bottom). The mean
-point of each activity-status group – the barycentre of its individuals,
+point of each occupation group – the barycentre of its individuals,
 which is what the test works on – sits as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">co</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_coord.html">get_coord</a></span><span class="op">(</span><span class="va">mca</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
-<span><span class="va">occ</span> <span class="op">&lt;-</span> <span class="va">mca</span><span class="op">$</span><span class="va">call</span><span class="op">$</span><span class="va">X</span><span class="op">$</span><span class="va">occup</span></span>
-<span><span class="va">bary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">co</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>occup <span class="op">=</span> <span class="va">occ</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span></span>
+<span><span class="va">occ</span> <span class="op">&lt;-</span> <span class="va">mca</span><span class="op">$</span><span class="va">call</span><span class="op">$</span><span class="va">X</span><span class="op">$</span><span class="va">occupation</span></span>
+<span><span class="va">bary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">co</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>occupation <span class="op">=</span> <span class="va">occ</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bary</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"D1"</span>, <span class="st">"D2"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bary</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">D1</span>, <span class="va">D2</span>, label <span class="op">=</span> <span class="va">occup</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bary</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">D1</span>, <span class="va">D2</span>, label <span class="op">=</span> <span class="va">occupation</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, colour <span class="op">=</span> <span class="st">"grey85"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, colour <span class="op">=</span> <span class="st">"grey85"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#D95F02"</span>, size <span class="op">=</span> <span class="fl">2.4</span><span class="op">)</span> <span class="op">+</span></span>
@@ -145,7 +151,7 @@ which is what the test works on – sits as follows:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_equal</a></span><span class="op">(</span>clip <span class="op">=</span> <span class="st">"off"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Axis 1 (volume of practices)"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Axis 2 (outdoor vs. urban-cultural)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="homogeneity_files/figure-html/map-1.png" class="r-plt" alt="Mean points of the activity-status groups on the first MCA plane." width="672" style="display: block; margin: auto;"></p>
+<p><img src="homogeneity_files/figure-html/map-1.png" class="r-plt" alt="Mean points of the occupation groups on the first MCA plane." width="672" style="display: block; margin: auto;"></p>
 <p>The students sit far in the “young / many / urban-cultural” corner
 and the retired on the opposite side; the employed and the unemployed
 crowd near the centre. Let us turn these impressions into tests.</p>
@@ -154,15 +160,15 @@ crowd near the centre. Let us turn these impressions into tests.</p>
 <h2 id="do-two-groups-differ-students-vs-the-retired">Do two groups differ? Students vs the retired<a class="anchor" aria-label="anchor" href="#do-two-groups-differ-students-vs-the-retired"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>,</span>
-<span>                  groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Etudiant, eleve"</span>, <span class="st">"Retraite"</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>,</span>
+<span>                  groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Student"</span>, <span class="st">"Retired"</span><span class="op">)</span>,</span>
 <span>                  axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
 <span><span class="va">sr</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Combinatorial homogeneity test (two groups)</span></span>
 <span><span class="co">#&gt; -------------------------------------------</span></span>
 <span><span class="co">#&gt; Cloud           : n = 2000 points, dimensionality L = 2</span></span>
-<span><span class="co">#&gt; Comparison      : partial -- "Etudiant, eleve" (n1 = 94) vs "Retraite" (n2 = 392), others pooled (n_r = 1514)</span></span>
+<span><span class="co">#&gt; Comparison      : partial -- "Student" (n1 = 94) vs "Retired" (n2 = 392), others pooled (n_r = 1514)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.04462  -- notable difference</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 1.484  (D^2 = 2.203) between the mean points</span></span>
@@ -195,21 +201,21 @@ is pinned down tightly, so the difference is certified with ease.</p>
 <em>statistical significance</em> from <em>the size of a
 difference</em>. Compare three pairs of groups:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Exerce une profession"</span>, <span class="st">"Chomeur"</span><span class="op">)</span>,</span>
-<span>              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Au foyer"</span>,              <span class="st">"Retraite"</span><span class="op">)</span>,</span>
-<span>              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Etudiant, eleve"</span>,       <span class="st">"Retraite"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Employed"</span>,  <span class="st">"Unemployed"</span><span class="op">)</span>,</span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Homemaker"</span>, <span class="st">"Retired"</span><span class="op">)</span>,</span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Student"</span>,   <span class="st">"Retired"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">pairs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occup"</span>, groups <span class="op">=</span> <span class="va">p</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
+<span>  <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occupation"</span>, groups <span class="op">=</span> <span class="va">p</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">p</span>, collapse <span class="op">=</span> <span class="st">" vs "</span><span class="op">)</span>,</span>
 <span>             D <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">statistic</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>             eta2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">pv</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>             p_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>             notable <span class="op">=</span> <span class="va">r</span><span class="op">$</span><span class="va">notable</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                         comparison    D  eta2 p_value notable</span></span>
-<span><span class="co">#&gt; 1 Exerce une profession vs Chomeur 0.16 0.001  0.1962   FALSE</span></span>
-<span><span class="co">#&gt; 2             Au foyer vs Retraite 0.32 0.003  0.0024   FALSE</span></span>
-<span><span class="co">#&gt; 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0001    TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt;               comparison    D  eta2 p_value notable</span></span>
+<span><span class="co">#&gt; 1 Employed vs Unemployed 0.16 0.001  0.1962   FALSE</span></span>
+<span><span class="co">#&gt; 2   Homemaker vs Retired 0.32 0.003  0.0024   FALSE</span></span>
+<span><span class="co">#&gt; 3     Student vs Retired 1.48 0.045  0.0001    TRUE</span></span></code></pre></div>
 <p>Three contrasting situations, the whole point of the method:</p>
 <ul>
 <li>
@@ -242,13 +248,13 @@ the Mahalanobis metric is the cloud’s). Alternatively, the
 <strong>specific</strong> comparison restricts the cloud to the two
 groups alone:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occup"</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Etudiant, eleve"</span>, <span class="st">"Retraite"</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occupation"</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Student"</span>, <span class="st">"Retired"</span><span class="op">)</span>,</span>
 <span>            axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, comparison <span class="op">=</span> <span class="st">"specific"</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Combinatorial homogeneity test (two groups)</span></span>
 <span><span class="co">#&gt; -------------------------------------------</span></span>
 <span><span class="co">#&gt; Cloud           : n = 486 points, dimensionality L = 2</span></span>
-<span><span class="co">#&gt; Comparison      : specific -- "Etudiant, eleve" (n1 = 94) vs "Retraite" (n2 = 392)</span></span>
+<span><span class="co">#&gt; Comparison      : specific -- "Student" (n1 = 94) vs "Retired" (n2 = 392)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.1936  -- notable difference</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 1.527  (D^2 = 2.332) between the mean points</span></span>
@@ -276,14 +282,14 @@ test of one group against their union.</p>
 </h2>
 <p>The direction of a difference matters as much as its size. Omitting
 <code>groups</code> compares all the categories of the variable; for
-<code>sexe</code> that is simply men vs women:</p>
+<code>sex</code> that is simply men vs women:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"sexe"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"sex"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Combinatorial homogeneity test (two groups)</span></span>
 <span><span class="co">#&gt; -------------------------------------------</span></span>
 <span><span class="co">#&gt; Cloud           : n = 2000 points, dimensionality L = 2</span></span>
-<span><span class="co">#&gt; Comparison      : global -- "Homme" (n1 = 899) vs "Femme" (n2 = 1101)</span></span>
+<span><span class="co">#&gt; Comparison      : global -- "Man" (n1 = 899) vs "Woman" (n2 = 1101)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.03097  -- small (&lt; notable limit 0.04)</span></span>
 <span><span class="co">#&gt; Mahalanobis distance D = 0.5391  (D^2 = 0.2906) between the mean points</span></span>
@@ -293,7 +299,7 @@ test of one group against their union.</p>
 <p>Here <code>p ≈ 0</code> but <code>η² ≈ 0.03</code> (significant, not
 notable): a small but real gap. Crucially it lies along <strong>axis
 2</strong>, not axis 1 – men lean toward outdoor/manual leisure
-(<code>peche.chasse</code>, <code>bricol</code>), women toward
+(<code>fishing.hunting</code>, <code>DIY</code>), women toward
 urban-cultural practices. Men and women do <em>similar amounts</em>
 (axis 1) of <em>different kinds</em> (axis 2) of leisure. The occupation
 contrasts above, by contrast, were differences of <em>volume</em> along
@@ -303,25 +309,25 @@ differ, but <em>in which direction</em>.</p>
 <div class="section level2">
 <h2 id="all-groups-at-once-the-omnibus">All groups at once: the omnibus<a class="anchor" aria-label="anchor" href="#all-groups-at-once-the-omnibus"></a>
 </h2>
-<p>To ask whether the activity-status groups are heterogeneous <em>as a
+<p>To ask whether the occupation groups are heterogeneous <em>as a
 whole</em>, omit <code>groups</code> so that all seven categories are
 compared. With more than two groups the statistic is the between-group
 Mahalanobis variance <code>V_M</code> (an omnibus test; there is no
 single deviation, hence no region):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, max_samples <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Combinatorial homogeneity test (7 groups)</span></span>
 <span><span class="co">#&gt; -----------------------------------------</span></span>
 <span><span class="co">#&gt; Cloud           : n = 2000 points, dimensionality L = 2</span></span>
-<span><span class="co">#&gt; Comparison      : global -- 7 groups: "Exerce une profession" (1049), "Chomeur" (134), "Etudiant, eleve" (94), "Retraite" (392), "Retire des affaires" (77), "Au foyer" (171), "Autre inactif" (83)</span></span>
+<span><span class="co">#&gt; Comparison      : global -- 7 groups: "Employed" (1049), "Unemployed" (134), "Student" (94), "Retired" (392), "Retired from business" (77), "Homemaker" (171), "Other inactive" (83)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion of variance (eta^2) = 0.1104  -- notable difference</span></span>
 <span><span class="co">#&gt; Between-group M-variance V_M = 0.1976</span></span>
 <span><span class="co">#&gt; Distribution    : Monte Carlo, 10,000 arrangements</span></span>
 <span><span class="co">#&gt; p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)</span></span></code></pre></div>
 <p><code>η² ≈ 0.11</code> of the cloud’s variance lies between the
-activity-status groups, and <code>p ≈ 0</code>: the groups are strongly
+occupation groups, and <code>p ≈ 0</code>: the groups are strongly
 heterogeneous overall. This is the homogeneity counterpart of an omnibus
 “are these groups different?” before drilling into the specific pairwise
 contrasts above.</p>
@@ -338,7 +344,7 @@ the students atypical of the respondents?”
 <li>
 <code><a href="../reference/homogeneity.html">homogeneity()</a></code> – <em>group vs group</em>. “Do the
 students and the retired differ from each other?”, or “are the
-activity-status groups heterogeneous?”</li>
+occupation groups heterogeneous?”</li>
 </ul>
 <p>They can disagree in illuminating ways: two groups may both be
 atypical of the cloud yet not heterogeneous from each other, or both be

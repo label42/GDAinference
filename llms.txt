@@ -2,13 +2,17 @@
 
 **Combinatorial inference for Geometric Data Analysis (GDA).**
 
+📖 **Documentation & tutorials:**
+<https://label42.github.io/GDAinference/>
+
 `GDAinference` implements the *exact* combinatorial (permutation)
 inference tests introduced by **Le Roux, Bienaise & Durand (2019),
 *Combinatorial Inference in Geometric Data Analysis* (Chapman &
 Hall/CRC).** These tests let you go beyond description — assessing
-whether a deviation observed in a PCA, MCA, CA (etc.) cloud is a genuine
-effect or might be due to chance — without the distributional
-assumptions of classical models.
+whether a group’s deviation observed in a PCA, MCA, CA (etc.) cloud
+could arise for a mere random subset of the individuals, or singles the
+group out as genuinely atypical — without the distributional assumptions
+of classical models.
 
 The package provides the three multidimensional tests of the book:
 
@@ -56,11 +60,19 @@ coordinates yourself and pass them as a matrix.
 
 ``` r
 
-# install.packages("remotes")
+install.packages("remotes")   # if not already installed
 remotes::install_github("label42/GDAinference")
 ```
 
 ## Example
+
+The example below uses two suggested packages (not installed
+automatically):
+
+``` r
+
+install.packages(c("FactoMineR", "questionr"))
+```
 
 Run your GDA, then ask whether a group is atypical of the cloud:
 
@@ -70,30 +82,35 @@ library(GDAinference)
 library(FactoMineR)
 data(hdv2003, package = "questionr")   # 2000 respondents, French "Histoire de vie" survey
 
-# A standard MCA of seven leisure practices, with activity status (occup)
+# Seven yes/no leisure practices (relabelled in English), with activity status
 # added as a supplementary variable -- the usual GDA workflow:
-vars <- c("hard.rock", "lecture.bd", "peche.chasse", "cuisine",
-          "bricol", "cinema", "sport")
-mca <- MCA(hdv2003[, c(vars, "occup")], quali.sup = 8, graph = FALSE)
+d <- hdv2003[, c("hard.rock", "lecture.bd", "peche.chasse", "cuisine",
+                 "bricol", "cinema", "sport", "occup")]
+names(d) <- c("hard.rock", "comics", "fishing.hunting", "cooking",
+              "DIY", "cinema", "sport", "occupation")
+for (v in names(d)[1:7]) levels(d[[v]]) <- c("No", "Yes")
+levels(d$occupation) <- c("Employed", "Unemployed", "Student", "Retired",
+                          "Retired from business", "Homemaker", "Other inactive")
+mca <- MCA(d, quali.sup = 8, graph = FALSE)
 
-# Is the mean point of each activity-status group atypical? (first plane)
-typicality_byvar(mca, "occup", axes = 1:2, seed = 1)
-#> Combinatorial typicality test by category of 'occup'
+# Is the mean point of each occupation group atypical? (first plane)
+typicality_byvar(mca, "occupation", axes = 1:2, seed = 1)
+#> Combinatorial typicality test by category of 'occupation'
 #> Cloud: n = 2000 individuals, dimensionality L = 2
 #>
 #>               category  n_c     D p_value sig notable
-#>  Exerce une profession 1049 0.279  <0.001   *      no   # significant, but D < 0.4 (large n)
-#>                Chomeur  134 0.129   0.305          no   # compatible with the whole cloud
-#>        Etudiant, eleve   94 0.973  <0.001   *     yes   # strongly atypical
-#>               Retraite  392 0.537  <0.001   *     yes
-#>    Retire des affaires   77 0.679  <0.001   *     yes
-#>               Au foyer  171 0.388  <0.001   *      no
-#>          Autre inactif   83 0.762  <0.001   *     yes
+#>               Employed 1049 0.279  <0.001   *      no   # significant, but D < 0.4 (large n)
+#>             Unemployed  134 0.129   0.305          no   # compatible with the whole cloud
+#>                Student   94 0.973  <0.001   *     yes   # strongly atypical
+#>                Retired  392 0.537  <0.001   *     yes
+#>  Retired from business   77 0.679  <0.001   *     yes
+#>              Homemaker  171 0.388  <0.001   *      no
+#>         Other inactive   83 0.762  <0.001   *     yes
 #>
 #> * p <= 0.05   |   'notable': D >= 0.4   |   montecarlo
 
 # Test a single group and visualise its 95% compatibility region:
-res <- typicality_comb(mca, group = "occup", level = "Etudiant, eleve", axes = 1:2)
+res <- typicality_comb(mca, group = "occupation", level = "Student", axes = 1:2)
 plot(res)
 ```
 
@@ -104,7 +121,7 @@ origin), using a sign-flip permutation and the cloud’s own covariance:
 ``` r
 
 # Are the students located at the cloud's origin, or genuinely displaced?
-typicality_geom(mca, group = "occup", level = "Etudiant, eleve",
+typicality_geom(mca, group = "occupation", level = "Student",
                 point = 0, axes = 1:2)
 ```
 
@@ -116,14 +133,14 @@ the groups (`comparison = "specific"`):
 ``` r
 
 # Do students and the retired occupy different positions in the first plane?
-res <- homogeneity(mca, group = "occup",
-                   groups = c("Etudiant, eleve", "Retraite"), axes = 1:2)
+res <- homogeneity(mca, group = "occupation",
+                   groups = c("Student", "Retired"), axes = 1:2)
 res
 plot(res)   # the deviation Gc2 - Gc1 against its 95% compatibility region
 
 # Omit `groups` to test all categories at once (global omnibus): are the
-# activity-status groups heterogeneous overall?
-homogeneity(mca, group = "occup", axes = 1:2)
+# occupation groups heterogeneous overall?
+homogeneity(mca, group = "occupation", axes = 1:2)
 ```
 
 With two groups the statistic is the Mahalanobis distance between the

@@ -99,8 +99,9 @@ An object of class `"typicality_geom"` (inheriting
 `"gdainference_test"`); print it for a summary. Key components:
 `statistic` (Mahalanobis distance \\D\\ between the mean point and `P`),
 `statistic2` (the test statistic \\d^2\_{obs}\\), `p_value`, `n_sup`,
-`n_perm`, `method`, `dim`, `n`, `notable`, `sided`, `reference_point`
-and `compatibility`.
+`n_perm`, `method`, `dim`, `n`, `group_label` (the tested category, when
+the cloud was restricted through `level`; used by the print and plot
+methods), `notable`, `sided`, `reference_point` and `compatibility`.
 
 ## Details
 

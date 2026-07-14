@@ -39,8 +39,8 @@ We reuse the MCA of the
 [`vignette("typicality")`](https://label42.github.io/GDAinference/articles/typicality.md):
 2000 respondents of the French “Histoire de vie” survey
 ([`questionr::hdv2003`](https://juba.github.io/questionr/reference/hdv2003.html))
-and seven leisure practices, with `sexe` and `occup` (activity status)
-as supplementary variables.
+and seven leisure practices (relabelled in English), with `sex` and
+`occupation` as supplementary variables.
 
 ``` r
 
@@ -49,26 +49,32 @@ library(FactoMineR)
 library(ggplot2)
 data("hdv2003", package = "questionr")
 
-active <- c("hard.rock", "lecture.bd", "peche.chasse",
-            "cuisine", "bricol", "cinema", "sport")
-d <- hdv2003[, c(active, "sexe", "occup", "age")]
+d <- hdv2003[, c("hard.rock", "lecture.bd", "peche.chasse", "cuisine",
+                 "bricol", "cinema", "sport", "sexe", "occup", "age")]
+names(d) <- c("hard.rock", "comics", "fishing.hunting", "cooking",
+              "DIY", "cinema", "sport", "sex", "occupation", "age")
+for (v in names(d)[1:7]) levels(d[[v]]) <- c("No", "Yes")
+levels(d$sex) <- c("Man", "Woman")
+levels(d$occupation) <- c("Employed", "Unemployed", "Student", "Retired",
+                          "Retired from business", "Homemaker",
+                          "Other inactive")
 mca <- MCA(d, quali.sup = 8:9, quanti.sup = 10, ncp = Inf, graph = FALSE)
 ```
 
 On the first plane, **axis 1** is the *volume* of practices (few on the
 left, many on the right; older respondents on the left) and **axis 2**
 opposes *outdoor/manual* leisure (top) to *urban-cultural* leisure
-(bottom). The mean point of each activity-status group – the barycentre
-of its individuals, which is what the test works on – sits as follows:
+(bottom). The mean point of each occupation group – the barycentre of
+its individuals, which is what the test works on – sits as follows:
 
 ``` r
 
 co <- get_coord(mca)[, 1:2]
-occ <- mca$call$X$occup
-bary <- aggregate(co, list(occup = occ), mean)
+occ <- mca$call$X$occupation
+bary <- aggregate(co, list(occupation = occ), mean)
 names(bary)[2:3] <- c("D1", "D2")
 
-ggplot(bary, aes(D1, D2, label = occup)) +
+ggplot(bary, aes(D1, D2, label = occupation)) +
   geom_hline(yintercept = 0, colour = "grey85") +
   geom_vline(xintercept = 0, colour = "grey85") +
   geom_point(colour = "#D95F02", size = 2.4) +
@@ -79,7 +85,7 @@ ggplot(bary, aes(D1, D2, label = occup)) +
        y = "Axis 2 (outdoor vs. urban-cultural)")
 ```
 
-![Mean points of the activity-status groups on the first MCA
+![Mean points of the occupation groups on the first MCA
 plane.](homogeneity_files/figure-html/map-1.png)
 
 The students sit far in the “young / many / urban-cultural” corner and
@@ -90,15 +96,15 @@ near the centre. Let us turn these impressions into tests.
 
 ``` r
 
-sr <- homogeneity(mca, group = "occup",
-                  groups = c("Etudiant, eleve", "Retraite"),
+sr <- homogeneity(mca, group = "occupation",
+                  groups = c("Student", "Retired"),
                   axes = 1:2, seed = 1, max_samples = 1e4)
 sr
 #> 
 #> Combinatorial homogeneity test (two groups)
 #> -------------------------------------------
 #> Cloud           : n = 2000 points, dimensionality L = 2
-#> Comparison      : partial -- "Etudiant, eleve" (n1 = 94) vs "Retraite" (n2 = 392), others pooled (n_r = 1514)
+#> Comparison      : partial -- "Student" (n1 = 94) vs "Retired" (n2 = 392), others pooled (n_r = 1514)
 #> 
 #> Proportion of variance (eta^2) = 0.04462  -- notable difference
 #> Mahalanobis distance D = 1.484  (D^2 = 2.203) between the mean points
@@ -139,21 +145,21 @@ groups:
 
 ``` r
 
-pairs <- list(c("Exerce une profession", "Chomeur"),
-              c("Au foyer",              "Retraite"),
-              c("Etudiant, eleve",       "Retraite"))
+pairs <- list(c("Employed",  "Unemployed"),
+              c("Homemaker", "Retired"),
+              c("Student",   "Retired"))
 do.call(rbind, lapply(pairs, function(p) {
-  r <- homogeneity(mca, "occup", groups = p, axes = 1:2, seed = 1, max_samples = 1e4)
+  r <- homogeneity(mca, "occupation", groups = p, axes = 1:2, seed = 1, max_samples = 1e4)
   data.frame(comparison = paste(p, collapse = " vs "),
              D = round(r$statistic, 2),
              eta2 = round(r$pv, 3),
              p_value = round(r$p_value, 4),
              notable = r$notable)
 }))
-#>                         comparison    D  eta2 p_value notable
-#> 1 Exerce une profession vs Chomeur 0.16 0.001  0.1962   FALSE
-#> 2             Au foyer vs Retraite 0.32 0.003  0.0024   FALSE
-#> 3      Etudiant, eleve vs Retraite 1.48 0.045  0.0001    TRUE
+#>               comparison    D  eta2 p_value notable
+#> 1 Employed vs Unemployed 0.16 0.001  0.1962   FALSE
+#> 2   Homemaker vs Retired 0.32 0.003  0.0024   FALSE
+#> 3     Student vs Retired 1.48 0.045  0.0001    TRUE
 ```
 
 Three contrasting situations, the whole point of the method:
@@ -181,13 +187,13 @@ restricts the cloud to the two groups alone:
 
 ``` r
 
-homogeneity(mca, "occup", groups = c("Etudiant, eleve", "Retraite"),
+homogeneity(mca, "occupation", groups = c("Student", "Retired"),
             axes = 1:2, comparison = "specific", seed = 1, max_samples = 1e4)
 #> 
 #> Combinatorial homogeneity test (two groups)
 #> -------------------------------------------
 #> Cloud           : n = 486 points, dimensionality L = 2
-#> Comparison      : specific -- "Etudiant, eleve" (n1 = 94) vs "Retraite" (n2 = 392)
+#> Comparison      : specific -- "Student" (n1 = 94) vs "Retired" (n2 = 392)
 #> 
 #> Proportion of variance (eta^2) = 0.1936  -- notable difference
 #> Mahalanobis distance D = 1.527  (D^2 = 2.332) between the mean points
@@ -213,17 +219,17 @@ with the combinatorial typicality test of one group against their union.
 ## A difference of a different kind: men and women
 
 The direction of a difference matters as much as its size. Omitting
-`groups` compares all the categories of the variable; for `sexe` that is
+`groups` compares all the categories of the variable; for `sex` that is
 simply men vs women:
 
 ``` r
 
-homogeneity(mca, group = "sexe", axes = 1:2, seed = 1, max_samples = 1e4)
+homogeneity(mca, group = "sex", axes = 1:2, seed = 1, max_samples = 1e4)
 #> 
 #> Combinatorial homogeneity test (two groups)
 #> -------------------------------------------
 #> Cloud           : n = 2000 points, dimensionality L = 2
-#> Comparison      : global -- "Homme" (n1 = 899) vs "Femme" (n2 = 1101)
+#> Comparison      : global -- "Man" (n1 = 899) vs "Woman" (n2 = 1101)
 #> 
 #> Proportion of variance (eta^2) = 0.03097  -- small (< notable limit 0.04)
 #> Mahalanobis distance D = 0.5391  (D^2 = 0.2906) between the mean points
@@ -234,7 +240,7 @@ homogeneity(mca, group = "sexe", axes = 1:2, seed = 1, max_samples = 1e4)
 
 Here `p ≈ 0` but `η² ≈ 0.03` (significant, not notable): a small but
 real gap. Crucially it lies along **axis 2**, not axis 1 – men lean
-toward outdoor/manual leisure (`peche.chasse`, `bricol`), women toward
+toward outdoor/manual leisure (`fishing.hunting`, `DIY`), women toward
 urban-cultural practices. Men and women do *similar amounts* (axis 1) of
 *different kinds* (axis 2) of leisure. The occupation contrasts above,
 by contrast, were differences of *volume* along axis 1. Homogeneity
@@ -243,20 +249,19 @@ direction*.
 
 ## All groups at once: the omnibus
 
-To ask whether the activity-status groups are heterogeneous *as a
-whole*, omit `groups` so that all seven categories are compared. With
-more than two groups the statistic is the between-group Mahalanobis
-variance `V_M` (an omnibus test; there is no single deviation, hence no
-region):
+To ask whether the occupation groups are heterogeneous *as a whole*,
+omit `groups` so that all seven categories are compared. With more than
+two groups the statistic is the between-group Mahalanobis variance `V_M`
+(an omnibus test; there is no single deviation, hence no region):
 
 ``` r
 
-homogeneity(mca, group = "occup", axes = 1:2, seed = 1, max_samples = 1e4)
+homogeneity(mca, group = "occupation", axes = 1:2, seed = 1, max_samples = 1e4)
 #> 
 #> Combinatorial homogeneity test (7 groups)
 #> -----------------------------------------
 #> Cloud           : n = 2000 points, dimensionality L = 2
-#> Comparison      : global -- 7 groups: "Exerce une profession" (1049), "Chomeur" (134), "Etudiant, eleve" (94), "Retraite" (392), "Retire des affaires" (77), "Au foyer" (171), "Autre inactif" (83)
+#> Comparison      : global -- 7 groups: "Employed" (1049), "Unemployed" (134), "Student" (94), "Retired" (392), "Retired from business" (77), "Homemaker" (171), "Other inactive" (83)
 #> 
 #> Proportion of variance (eta^2) = 0.1104  -- notable difference
 #> Between-group M-variance V_M = 0.1976
@@ -264,10 +269,10 @@ homogeneity(mca, group = "occup", axes = 1:2, seed = 1, max_samples = 1e4)
 #> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
 ```
 
-`η² ≈ 0.11` of the cloud’s variance lies between the activity-status
-groups, and `p ≈ 0`: the groups are strongly heterogeneous overall. This
-is the homogeneity counterpart of an omnibus “are these groups
-different?” before drilling into the specific pairwise contrasts above.
+`η² ≈ 0.11` of the cloud’s variance lies between the occupation groups,
+and `p ≈ 0`: the groups are strongly heterogeneous overall. This is the
+homogeneity counterpart of an omnibus “are these groups different?”
+before drilling into the specific pairwise contrasts above.
 
 ## Typicality or homogeneity?
 
@@ -279,7 +284,7 @@ and the cloud reading tells you which you need:
   ([`vignette("typicality")`](https://label42.github.io/GDAinference/articles/typicality.md)).
 - [`homogeneity()`](https://label42.github.io/GDAinference/reference/homogeneity.md)
   – *group vs group*. “Do the students and the retired differ from each
-  other?”, or “are the activity-status groups heterogeneous?”
+  other?”, or “are the occupation groups heterogeneous?”
 
 They can disagree in illuminating ways: two groups may both be atypical
 of the cloud yet not heterogeneous from each other, or both be typical

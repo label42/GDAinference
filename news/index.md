@@ -2,6 +2,31 @@
 
 ## GDAinference 0.0.0.9000 (development version)
 
+### Usability improvements (user feedback)
+
+- Test results now carry the name of the tested group:
+  [`typicality_comb()`](https://label42.github.io/GDAinference/reference/typicality_comb.md)
+  and
+  [`typicality_geom()`](https://label42.github.io/GDAinference/reference/typicality_geom.md)
+  store a `group_label` component when the group is specified through
+  `level` (e.g. `occupation = "Student"`), and
+  [`typicality_byvar()`](https://label42.github.io/GDAinference/reference/typicality_byvar.md)
+  labels each per-category result. The
+  [`print()`](https://rdrr.io/r/base/print.html) methods show the label,
+  and the [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  methods include it in the subtitle — the two-group
+  [`homogeneity()`](https://label42.github.io/GDAinference/reference/homogeneity.md)
+  plot likewise names the compared groups.
+- The typicality tutorial vignette has a rewritten introduction (why an
+  MCA, how it is traditionally interpreted, why description alone is not
+  enough), a simpler cloud map, and clearer wording around sampling
+  variability. A new section relates the typicality test to the v-test
+  on a supplementary category, of which it is the exact,
+  multidimensional generalisation.
+- The `hdv2003` examples of the README and of the typicality and
+  homogeneity vignettes now relabel the variables and categories in
+  English.
+
 ### Statistical fixes (audit)
 
 - **Monte Carlo p-values now use the add-one correction of Phipson &

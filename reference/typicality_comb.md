@@ -110,7 +110,9 @@ An object of class `"typicality_comb"` (inheriting
 `"gdainference_test"`): a list with components including `statistic`
 (Mahalanobis distance \\D\\), `statistic2` (\\d^2\_{obs}\\), `p_value`,
 `n_sup`, `n_perm`, `method`, `dim` (dimensionality \\L\\), `n`, `n_c`,
-`notable` and `compatibility`. Print it for a formatted summary.
+`group_label` (the tested category, when the group was specified through
+`level`; used by the print and plot methods), `notable` and
+`compatibility`. Print it for a formatted summary.
 
 ## Details
 

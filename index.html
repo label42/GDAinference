@@ -70,7 +70,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 <p><strong>Combinatorial inference for Geometric Data Analysis (GDA).</strong></p>
-<p><code>GDAinference</code> implements the <em>exact</em> combinatorial (permutation) inference tests introduced by <strong>Le Roux, Bienaise &amp; Durand (2019), <em>Combinatorial Inference in Geometric Data Analysis</em> (Chapman &amp; Hall/CRC).</strong> These tests let you go beyond description — assessing whether a deviation observed in a PCA, MCA, CA (etc.) cloud is a genuine effect or might be due to chance — without the distributional assumptions of classical models.</p>
+<p>📖 <strong>Documentation &amp; tutorials:</strong> <a href="https://label42.github.io/GDAinference/" class="uri">https://label42.github.io/GDAinference/</a></p>
+<p><code>GDAinference</code> implements the <em>exact</em> combinatorial (permutation) inference tests introduced by <strong>Le Roux, Bienaise &amp; Durand (2019), <em>Combinatorial Inference in Geometric Data Analysis</em> (Chapman &amp; Hall/CRC).</strong> These tests let you go beyond description — assessing whether a group’s deviation observed in a PCA, MCA, CA (etc.) cloud could arise for a mere random subset of the individuals, or singles the group out as genuinely atypical — without the distributional assumptions of classical models.</p>
 <p>The package provides the three multidimensional tests of the book:</p>
 <table class="table">
 <colgroup>
@@ -151,59 +152,67 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>   <span class="co"># if not already installed</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"label42/GDAinference"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Run your GDA, then ask whether a group is atypical of the cloud:</p>
+<p>The example below uses two suggested packages (not installed automatically):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FactoMineR"</span>, <span class="st">"questionr"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Run your GDA, then ask whether a group is atypical of the cloud:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://label42.github.io/GDAinference/">GDAinference</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://factominer.free.fr" class="external-link">FactoMineR</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hdv2003</span>, package <span class="op">=</span> <span class="st">"questionr"</span><span class="op">)</span>   <span class="co"># 2000 respondents, French "Histoire de vie" survey</span></span>
 <span></span>
-<span><span class="co"># A standard MCA of seven leisure practices, with activity status (occup)</span></span>
+<span><span class="co"># Seven yes/no leisure practices (relabelled in English), with activity status</span></span>
 <span><span class="co"># added as a supplementary variable -- the usual GDA workflow:</span></span>
-<span><span class="va">vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>, <span class="st">"cuisine"</span>,</span>
-<span>          <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span><span class="op">)</span></span>
-<span><span class="va">mca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/MCA.html" class="external-link">MCA</a></span><span class="op">(</span><span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">vars</span>, <span class="st">"occup"</span><span class="op">)</span><span class="op">]</span>, quali.sup <span class="op">=</span> <span class="fl">8</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">hdv2003</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"lecture.bd"</span>, <span class="st">"peche.chasse"</span>, <span class="st">"cuisine"</span>,</span>
+<span>                 <span class="st">"bricol"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"occup"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hard.rock"</span>, <span class="st">"comics"</span>, <span class="st">"fishing.hunting"</span>, <span class="st">"cooking"</span>,</span>
+<span>              <span class="st">"DIY"</span>, <span class="st">"cinema"</span>, <span class="st">"sport"</span>, <span class="st">"occupation"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">[[</span><span class="va">v</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">occupation</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Employed"</span>, <span class="st">"Unemployed"</span>, <span class="st">"Student"</span>, <span class="st">"Retired"</span>,</span>
+<span>                          <span class="st">"Retired from business"</span>, <span class="st">"Homemaker"</span>, <span class="st">"Other inactive"</span><span class="op">)</span></span>
+<span><span class="va">mca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/MCA.html" class="external-link">MCA</a></span><span class="op">(</span><span class="va">d</span>, quali.sup <span class="op">=</span> <span class="fl">8</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Is the mean point of each activity-status group atypical? (first plane)</span></span>
-<span><span class="fu"><a href="reference/typicality_byvar.html">typicality_byvar</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occup"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Combinatorial typicality test by category of 'occup'</span></span>
+<span><span class="co"># Is the mean point of each occupation group atypical? (first plane)</span></span>
+<span><span class="fu"><a href="reference/typicality_byvar.html">typicality_byvar</a></span><span class="op">(</span><span class="va">mca</span>, <span class="st">"occupation"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Combinatorial typicality test by category of 'occupation'</span></span>
 <span><span class="co">#&gt; Cloud: n = 2000 individuals, dimensionality L = 2</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt;               category  n_c     D p_value sig notable</span></span>
-<span><span class="co">#&gt;  Exerce une profession 1049 0.279  &lt;0.001   *      no   # significant, but D &lt; 0.4 (large n)</span></span>
-<span><span class="co">#&gt;                Chomeur  134 0.129   0.305          no   # compatible with the whole cloud</span></span>
-<span><span class="co">#&gt;        Etudiant, eleve   94 0.973  &lt;0.001   *     yes   # strongly atypical</span></span>
-<span><span class="co">#&gt;               Retraite  392 0.537  &lt;0.001   *     yes</span></span>
-<span><span class="co">#&gt;    Retire des affaires   77 0.679  &lt;0.001   *     yes</span></span>
-<span><span class="co">#&gt;               Au foyer  171 0.388  &lt;0.001   *      no</span></span>
-<span><span class="co">#&gt;          Autre inactif   83 0.762  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;               Employed 1049 0.279  &lt;0.001   *      no   # significant, but D &lt; 0.4 (large n)</span></span>
+<span><span class="co">#&gt;             Unemployed  134 0.129   0.305          no   # compatible with the whole cloud</span></span>
+<span><span class="co">#&gt;                Student   94 0.973  &lt;0.001   *     yes   # strongly atypical</span></span>
+<span><span class="co">#&gt;                Retired  392 0.537  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;  Retired from business   77 0.679  &lt;0.001   *     yes</span></span>
+<span><span class="co">#&gt;              Homemaker  171 0.388  &lt;0.001   *      no</span></span>
+<span><span class="co">#&gt;         Other inactive   83 0.762  &lt;0.001   *     yes</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; * p &lt;= 0.05   |   'notable': D &gt;= 0.4   |   montecarlo</span></span>
 <span></span>
 <span><span class="co"># Test a single group and visualise its 95% compatibility region:</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/typicality_comb.html">typicality_comb</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, level <span class="op">=</span> <span class="st">"Etudiant, eleve"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/typicality_comb.html">typicality_comb</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>, level <span class="op">=</span> <span class="st">"Student"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
 <p>A second test, <strong>geometric typicality</strong> (ch. 4), asks instead whether a cloud’s mean point coincides with a fixed <em>reference point</em> (e.g. the origin), using a sign-flip permutation and the cloud’s own covariance:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Are the students located at the cloud's origin, or genuinely displaced?</span></span>
-<span><span class="fu"><a href="reference/typicality_geom.html">typicality_geom</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, level <span class="op">=</span> <span class="st">"Etudiant, eleve"</span>,</span>
+<span><span class="fu"><a href="reference/typicality_geom.html">typicality_geom</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>, level <span class="op">=</span> <span class="st">"Student"</span>,</span>
 <span>                point <span class="op">=</span> <span class="fl">0</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>The third test, <strong>homogeneity</strong> (ch. 5), compares the mean points of <strong>two or more groups</strong>: do they differ? Either <em>within</em> the whole cloud (<code>comparison = "partial"</code>, the default) or by restricting the cloud to the groups (<code>comparison = "specific"</code>):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Do students and the retired occupy different positions in the first plane?</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>,</span>
-<span>                   groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Etudiant, eleve"</span>, <span class="st">"Retraite"</span><span class="op">)</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>,</span>
+<span>                   groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Student"</span>, <span class="st">"Retired"</span><span class="op">)</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">res</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>   <span class="co"># the deviation Gc2 - Gc1 against its 95% compatibility region</span></span>
 <span></span>
 <span><span class="co"># Omit `groups` to test all categories at once (global omnibus): are the</span></span>
-<span><span class="co"># activity-status groups heterogeneous overall?</span></span>
-<span><span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occup"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># occupation groups heterogeneous overall?</span></span>
+<span><span class="fu"><a href="reference/homogeneity.html">homogeneity</a></span><span class="op">(</span><span class="va">mca</span>, group <span class="op">=</span> <span class="st">"occupation"</span>, axes <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>With two groups the statistic is the Mahalanobis distance between the mean points (with a compatibility region); with more than two it is the between-group Mahalanobis variance (an omnibus test).</p>
 <p>The same calls work on a GDAtools <code>speMCA</code> / <code>csMCA</code> or an ade4 <code>dudi.pca</code> / <code>dudi.acm</code> object — just pass it instead. See <code><a href="articles/typicality.html">vignette("typicality", "GDAinference")</a></code> for the full walk-through and how to read the results (notably, <em>significant</em> vs. <em>notable</em>).</p>
 </div>
