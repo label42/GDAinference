@@ -65,8 +65,9 @@
 #'   `"gdainference_test"`); print it for a summary. Key components: `statistic`
 #'   (Mahalanobis distance \eqn{D} between the mean point and `P`), `statistic2`
 #'   (the test statistic \eqn{d^2_{obs}}), `p_value`, `n_sup`, `n_perm`,
-#'   `method`, `dim`, `n`, `notable`, `sided`, `reference_point` and
-#'   `compatibility`.
+#'   `method`, `dim`, `n`, `group_label` (the tested category, when the cloud
+#'   was restricted through `level`; used by the print and plot methods),
+#'   `notable`, `sided`, `reference_point` and `compatibility`.
 #'
 #' @references
 #' Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
@@ -97,9 +98,11 @@ typicality_geom <- function(x, point = 0, group = NULL, level = NULL,
   n_full <- nrow(X)
 
   # optional restriction to a subgroup -------------------------------------
+  group_label <- NULL
   if (!is.null(level)) {
     v <- .as_variable(x, group, n_full)
     X <- X[which(.level_membership(v, level)), , drop = FALSE]
+    group_label <- .group_label(group, level)
   } else if (!is.null(group)) {
     idx <- if (is.logical(group)) {
       if (length(group) != n_full) {
@@ -188,6 +191,7 @@ typicality_geom <- function(x, point = 0, group = NULL, level = NULL,
         "exact (exhaustive enumeration)" else "Monte Carlo",
       dim = L,
       n = n,
+      group_label = group_label,
       K = K,
       eigenvalues = basis$lambda,
       alpha = alpha,
@@ -222,6 +226,9 @@ print.typicality_geom <- function(x, digits = 4, ...) {
               x$n, x$dim))
   if (!is.null(x$K) && x$K != x$dim) cat(sprintf(" (from %d axes)", x$K))
   cat("\n")
+  if (!is.null(x$group_label)) {
+    cat(sprintf("Group           : %s\n", x$group_label))
+  }
   cat(sprintf("Reference point : (%s)\n",
               paste(format(x$reference_point, digits = digits), collapse = "; ")))
 

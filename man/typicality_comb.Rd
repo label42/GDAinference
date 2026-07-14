@@ -73,7 +73,9 @@ An object of class \code{"typicality_comb"} (inheriting
 \code{"gdainference_test"}): a list with components including \code{statistic}
 (Mahalanobis distance \eqn{D}), \code{statistic2} (\eqn{d^2_{obs}}), \code{p_value},
 \code{n_sup}, \code{n_perm}, \code{method}, \code{dim} (dimensionality \eqn{L}), \code{n}, \code{n_c},
-\code{notable} and \code{compatibility}. Print it for a formatted summary.
+\code{group_label} (the tested category, when the group was specified through
+\code{level}; used by the print and plot methods), \code{notable} and
+\code{compatibility}. Print it for a formatted summary.
 }
 \description{
 Performs the exact combinatorial (permutation) typicality test of Le Roux,

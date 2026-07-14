@@ -14,7 +14,9 @@ print.gdainference_test <- function(x, digits = 4, ...) {
   if (!is.null(x$K) && x$K != x$dim) cat(sprintf(" (from %d axes)", x$K))
   cat("\n")
   if (!is.null(x$n_c)) {
-    cat(sprintf("Group cloud     : n_c = %d points\n", x$n_c))
+    cat(sprintf("Group cloud     : %sn_c = %d points\n",
+                if (!is.null(x$group_label)) paste0(x$group_label, ", ") else "",
+                x$n_c))
   }
 
   cat(sprintf("\nMahalanobis distance D = %s  (D^2 = %s)  -- %s\n",

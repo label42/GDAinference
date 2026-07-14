@@ -64,8 +64,9 @@ An object of class \code{"typicality_geom"} (inheriting
 \code{"gdainference_test"}); print it for a summary. Key components: \code{statistic}
 (Mahalanobis distance \eqn{D} between the mean point and \code{P}), \code{statistic2}
 (the test statistic \eqn{d^2_{obs}}), \code{p_value}, \code{n_sup}, \code{n_perm},
-\code{method}, \code{dim}, \code{n}, \code{notable}, \code{sided}, \code{reference_point} and
-\code{compatibility}.
+\code{method}, \code{dim}, \code{n}, \code{group_label} (the tested category, when the cloud
+was restricted through \code{level}; used by the print and plot methods),
+\code{notable}, \code{sided}, \code{reference_point} and \code{compatibility}.
 }
 \description{
 Performs the geometric (sign-flip) typicality test of Le Roux, Bienaise and

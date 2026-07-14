@@ -65,6 +65,7 @@ typicality_byvar <- function(reference, variable, axes = NULL,
                            notable = notable, alpha = alpha,
                            max_samples = max_samples, seed = seed,
                            keep_geometry = FALSE)
+    res$group_label <- sprintf("%s = \"%s\"", vname, l)
     results[[l]] <- res
     rows[[l]] <- data.frame(
       category = l, n_c = res$n_c, D = res$statistic,

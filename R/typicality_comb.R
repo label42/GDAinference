@@ -60,7 +60,9 @@
 #'   `"gdainference_test"`): a list with components including `statistic`
 #'   (Mahalanobis distance \eqn{D}), `statistic2` (\eqn{d^2_{obs}}), `p_value`,
 #'   `n_sup`, `n_perm`, `method`, `dim` (dimensionality \eqn{L}), `n`, `n_c`,
-#'   `notable` and `compatibility`. Print it for a formatted summary.
+#'   `group_label` (the tested category, when the group was specified through
+#'   `level`; used by the print and plot methods), `notable` and
+#'   `compatibility`. Print it for a formatted summary.
 #'
 #' @references
 #' Le Roux, B., Bienaise, S. & Durand, J.-L. (2019).
@@ -95,9 +97,11 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
   if (is.null(level)) {
     grp <- .resolve_group(group, X_ref, axes = axes, ...)
     X_grp <- grp$coord
+    group_label <- NULL
   } else {
     v <- .as_variable(reference, group, n)
     X_grp <- X_ref[which(.level_membership(v, level)), , drop = FALSE]
+    group_label <- .group_label(group, level)
   }
   n_c <- nrow(X_grp)
   if (n_c < 1L) stop("The group cloud is empty.", call. = FALSE)
@@ -157,6 +161,7 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
       dim = L,
       n = n,
       n_c = n_c,
+      group_label = group_label,
       K = basis$K,
       eigenvalues = basis$lambda,
       alpha = alpha,
@@ -180,6 +185,19 @@ typicality_comb <- function(reference, group, level = NULL, axes = NULL,
 }
 
 # ---- internal helpers -----------------------------------------------------
+
+#' Human-readable label of a group defined by a grouping variable and a level:
+#' 'var = "level"' when the variable was passed by name, the bare level(s)
+#' otherwise.
+#' @noRd
+.group_label <- function(group, level) {
+  lab <- paste(as.character(level), collapse = " / ")
+  if (is.character(group) && length(group) == 1L) {
+    sprintf("%s = \"%s\"", group, lab)
+  } else {
+    lab
+  }
+}
 
 #' Orthocalibrated principal basis of a cloud
 #'

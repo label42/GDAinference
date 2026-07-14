@@ -97,12 +97,14 @@ plot.typicality_comb <- function(x, axes = c(1, 2), ...) {
     ggplot2::coord_equal() +
     ggplot2::labs(
       x = nm[i], y = nm[j], colour = NULL, title = x$type,
-      subtitle = sprintf(
-        "D = %s, p = %s  -  %.0f%% compatibility ellipse (d = %s)",
-        format(x$statistic, digits = 3),
-        format(x$p_value, digits = 3),
-        100 * (1 - x$alpha),
-        format(geo$d_alpha, digits = 3))) +
+      subtitle = paste0(
+        if (!is.null(x$group_label)) sprintf("Group: %s\n", x$group_label) else "",
+        sprintf(
+          "D = %s, p = %s  -  %.0f%% compatibility ellipse (d = %s)",
+          format(x$statistic, digits = 3),
+          format(x$p_value, digits = 3),
+          100 * (1 - x$alpha),
+          format(geo$d_alpha, digits = 3)))) +
     ggplot2::theme_minimal()
 }
 
@@ -192,12 +194,14 @@ plot.typicality_geom <- function(x, axes = c(1, 2), ...) {
     ggplot2::coord_equal() +
     ggplot2::labs(
       x = nm[i], y = nm[j], colour = NULL, title = x$type,
-      subtitle = sprintf(
-        "D = %s, p = %s  -  %.0f%% compatibility ellipse (kappa = %s)",
-        format(x$statistic, digits = 3),
-        format(x$p_value, digits = 3),
-        100 * (1 - x$alpha),
-        format(geo$kappa, digits = 3))) +
+      subtitle = paste0(
+        if (!is.null(x$group_label)) sprintf("Group: %s\n", x$group_label) else "",
+        sprintf(
+          "D = %s, p = %s  -  %.0f%% compatibility ellipse (kappa = %s)",
+          format(x$statistic, digits = 3),
+          format(x$p_value, digits = 3),
+          100 * (1 - x$alpha),
+          format(geo$kappa, digits = 3)))) +
     ggplot2::theme_minimal()
 }
 
@@ -299,12 +303,15 @@ plot.homogeneity <- function(x, axes = c(1, 2), ...) {
       x = sprintf("deviation on %s", nm[i]),
       y = sprintf("deviation on %s", nm[j]),
       colour = NULL, title = x$type,
-      subtitle = sprintf(
-        "D = %s, p = %s  -  O is %s the %.0f%% region (kappa = %s)",
-        format(x$statistic, digits = 3),
-        format(x$p_value, digits = 3),
-        if (isTRUE(x$p_value > x$alpha)) "inside" else "outside",
-        100 * (1 - x$alpha),
-        format(comp$kappa, digits = 3))) +
+      subtitle = paste0(
+        if (!is.null(x$groups) && length(x$groups) == 2L)
+          sprintf("Groups: %s vs %s\n", x$groups[1L], x$groups[2L]) else "",
+        sprintf(
+          "D = %s, p = %s  -  O is %s the %.0f%% region (kappa = %s)",
+          format(x$statistic, digits = 3),
+          format(x$p_value, digits = 3),
+          if (isTRUE(x$p_value > x$alpha)) "inside" else "outside",
+          100 * (1 - x$alpha),
+          format(comp$kappa, digits = 3)))) +
     ggplot2::theme_minimal()
 }
