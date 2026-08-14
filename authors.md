@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Abel Aussant**. Author, maintainer.
+- **Abel Aussant**. Author, maintainer, copyright holder.
 
 ## Citation
 
