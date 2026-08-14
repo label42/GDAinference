@@ -15,6 +15,10 @@
 
 * This is a new submission (first release of the package).
 
+The words flagged as possibly misspelled in the DESCRIPTION are an author
+surname (Bienaise), a publisher (CRC) and a correctly spelled statistical
+term (combinatorial).
+
 ## Downstream dependencies
 
 There are no downstream dependencies: this is a new package.
