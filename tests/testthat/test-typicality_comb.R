@@ -78,7 +78,10 @@ test_that("Monte Carlo p-values are add-one corrected and never zero", {
   # Phipson & Smyth (2010): p = (b + 1) / (B + 1), never zero
   expect_equal(res$p_value, (res$n_sup + 1) / (res$n_perm + 1))
   expect_gt(res$p_value, 0)
-  expect_output(print(res), "add-one")
+  # the print method reports the plain p-value, without the correction formula
+  printed <- paste(capture.output(print(res)), collapse = "\n")
+  expect_match(printed, format(res$p_value, digits = 4), fixed = TRUE)
+  expect_false(grepl("add-one", printed, fixed = TRUE))
   # the exhaustive p-value stays the exact proportion
   ex <- typicality_comb(Target, Target_group)
   expect_equal(ex$p_value, ex$n_sup / ex$n_perm)

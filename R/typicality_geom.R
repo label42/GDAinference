@@ -240,13 +240,17 @@ print.typicality_geom <- function(x, digits = 4, ...) {
               format(x$statistic2, digits = digits)))
   cat(sprintf("Distribution    : %s, %s samples\n",
               x$method_label, format(x$n_perm, big.mark = ",")))
-  cat(sprintf("p-value         : %s / %s = %s%s%s\n",
-              format(x$n_sup_display, big.mark = ","),
-              format(x$n_perm_display, big.mark = ","),
-              format(x$p_value, digits = digits),
-              if (identical(x$sided, "one-sided")) "  (one-sided)" else "",
-              if (identical(x$method, "montecarlo"))
-                "  (add-one corrected)" else ""))
+  if (identical(x$method, "montecarlo")) {
+    cat(sprintf("p-value         : %s%s\n",
+                format(x$p_value, digits = digits),
+                if (identical(x$sided, "one-sided")) "  (one-sided)" else ""))
+  } else {
+    cat(sprintf("p-value         : %s / %s = %s%s\n",
+                format(x$n_sup_display, big.mark = ","),
+                format(x$n_perm_display, big.mark = ","),
+                format(x$p_value, digits = digits),
+                if (identical(x$sided, "one-sided")) "  (one-sided)" else ""))
+  }
   if (identical(x$sided, "one-sided")) {
     cat("  (direction chosen from the data: for a non-directional claim,\n",
         "   compare the one-sided p-value to alpha/2)\n", sep = "")

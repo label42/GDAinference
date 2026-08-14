@@ -334,10 +334,8 @@ print.homogeneity <- function(x, digits = 4, ...) {
   cat(sprintf("Distribution    : %s, %s arrangements\n",
               x$method_label, format(x$n_perm, big.mark = ",")))
   if (identical(x$method, "montecarlo")) {
-    cat(sprintf("p-value%s : (%s + 1) / (%s + 1) = %s  (add-one corrected)\n",
+    cat(sprintf("p-value%s : %s\n",
                 if (identical(x$sided, "one-sided")) " (1-sided)" else "        ",
-                format(x$n_sup, big.mark = ","),
-                format(x$n_perm, big.mark = ","),
                 format(x$p_value, digits = digits)))
   } else {
     cat(sprintf("p-value%s : %s / %s = %s\n",

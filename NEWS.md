@@ -15,6 +15,11 @@
   category, of which it is the exact, multidimensional generalisation.
 * The `hdv2003` examples of the README and of the typicality and homogeneity
   vignettes now relabel the variables and categories in English.
+* Monte Carlo results now print the plain p-value instead of the add-one
+  correction formula `(b + 1)/(B + 1)`, which confused more than it informed.
+  The correction of Phipson & Smyth (2010) is still applied and remains
+  documented in the help pages; exhaustive results keep their exact fraction
+  display (e.g. `9 / 210 = 0.0429`).
 
 ## Statistical fixes (audit)
 

@@ -28,9 +28,7 @@ print.gdainference_test <- function(x, digits = 4, ...) {
   cat(sprintf("Distribution    : %s, %s samples\n",
               x$method_label, format(x$n_perm, big.mark = ",")))
   if (identical(x$method, "montecarlo")) {
-    cat(sprintf("p-value         : (%s + 1) / (%s + 1) = %s  (add-one corrected)\n",
-                format(x$n_sup, big.mark = ","),
-                format(x$n_perm, big.mark = ","),
+    cat(sprintf("p-value         : %s\n",
                 format(x$p_value, digits = digits)))
   } else {
     cat(sprintf("p-value         : %s / %s = %s\n",

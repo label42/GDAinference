@@ -109,7 +109,10 @@ test_that("Monte Carlo p-values are add-one corrected and never zero", {
   expect_identical(res$method, "montecarlo")
   expect_equal(res$p_value, (res$n_sup + 1) / (res$n_perm + 1))
   expect_gt(res$p_value, 0)
-  expect_output(print(res), "add-one")
+  # the print method reports the plain p-value, without the correction formula
+  printed <- paste(capture.output(print(res)), collapse = "\n")
+  expect_match(printed, format(res$p_value, digits = 4), fixed = TRUE)
+  expect_false(grepl("add-one", printed, fixed = TRUE))
 
   res1 <- homogeneity(X, g, axes = 1, max_samples = 1000, seed = 2)
   expect_identical(res1$method, "montecarlo")
