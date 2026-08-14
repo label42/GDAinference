@@ -12,3 +12,4 @@
 ^docs$
 ^\.positai$
 ^\.claude$
+^GDAinference-manual\.pdf$
