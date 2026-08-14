@@ -3,7 +3,7 @@ Title: Combinatorial Inference in Geometric Data Analysis
 Version: 0.1.0
 Authors@R:
     person("Abel", "Aussant", email = "abel.aussant@gmail.com",
-           role = c("aut", "cre"))
+           role = c("aut", "cre", "cph"))
 Description: Exact combinatorial (permutation) inference tests for Geometric
     Data Analysis (GDA). The package implements the multidimensional
     typicality and homogeneity tests introduced by Le Roux, Bienaise and
