@@ -109,7 +109,7 @@ sr
 #> Proportion of variance (eta^2) = 0.04462  -- notable difference
 #> Mahalanobis distance D = 1.484  (D^2 = 2.203) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
+#> p-value         : 9.999e-05
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.2816
 ```
 
@@ -198,7 +198,7 @@ homogeneity(mca, "occupation", groups = c("Student", "Retired"),
 #> Proportion of variance (eta^2) = 0.1936  -- notable difference
 #> Mahalanobis distance D = 1.527  (D^2 = 2.332) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
+#> p-value         : 9.999e-05
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.2834
 ```
 
@@ -234,7 +234,7 @@ homogeneity(mca, group = "sex", axes = 1:2, seed = 1, max_samples = 1e4)
 #> Proportion of variance (eta^2) = 0.03097  -- small (< notable limit 0.04)
 #> Mahalanobis distance D = 0.5391  (D^2 = 0.2906) between the mean points
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
+#> p-value         : 9.999e-05
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.1102
 ```
 
@@ -266,7 +266,7 @@ homogeneity(mca, group = "occupation", axes = 1:2, seed = 1, max_samples = 1e4)
 #> Proportion of variance (eta^2) = 0.1104  -- notable difference
 #> Between-group M-variance V_M = 0.1976
 #> Distribution    : Monte Carlo, 10,000 arrangements
-#> p-value         : (0 + 1) / (10,000 + 1) = 9.999e-05  (add-one corrected)
+#> p-value         : 9.999e-05
 ```
 
 `η² ≈ 0.11` of the cloud’s variance lies between the occupation groups,

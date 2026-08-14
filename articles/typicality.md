@@ -148,7 +148,7 @@ students
 #> 
 #> Mahalanobis distance D = 0.9729  (D^2 = 0.9465)  -- notable deviation
 #> Distribution    : Monte Carlo, 100,000 samples
-#> p-value         : (0 + 1) / (100,000 + 1) = 1e-05  (add-one corrected)
+#> p-value         : 1e-05
 #> 95% compatibility : principal ellipsoid, scale = 0.2456
 ```
 
