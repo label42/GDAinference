@@ -1,4 +1,6 @@
-# GDAinference 0.0.0.9000 (development version)
+# GDAinference 0.1.0
+
+First CRAN release.
 
 ## Usability improvements (user feedback)
 

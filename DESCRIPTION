@@ -1,6 +1,6 @@
 Package: GDAinference
 Title: Combinatorial Inference in Geometric Data Analysis
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R:
     person("Abel", "Aussant", email = "abel.aussant@gmail.com",
            role = c("aut", "cre"))
@@ -8,7 +8,8 @@ Description: Exact combinatorial (permutation) inference tests for Geometric
     Data Analysis (GDA). The package implements the multidimensional
     typicality and homogeneity tests introduced by Le Roux, Bienaise and
     Durand (2019, "Combinatorial Inference in Geometric Data Analysis",
-    Chapman & Hall/CRC). Tests operate on the principal coordinates produced
+    Chapman & Hall/CRC) <doi:10.1201/9781315155289>. Tests operate on the
+    principal coordinates produced
     by common GDA methods and integrate natively with the 'FactoMineR',
     'GDAtools' and 'ade4' packages, as well as with plain coordinate matrices.
     Each test returns a p-value from the combinatorial distribution of a
