@@ -18,7 +18,7 @@ The reasoning is a *reflection* argument:
 > would be just as likely to point one way as the opposite. Flipping the
 > sign of each effect-vector in every possible way builds the reference
 > distribution, and we ask how far the observed mean effect is from the
-> **null point** $`O`$ (“no effect”).
+> **null point** \\O\\ (“no effect”).
 
 [`typicality_geom()`](https://label42.github.io/GDAinference/reference/typicality_geom.md)
 does this, in the principal plane of a GDA, returning a p-value and a
@@ -91,7 +91,7 @@ head(round(effect, 2))
 These 16 effect-vectors form a cloud. Under “no effect”, each one is
 equally likely to point either way (the reflection argument above), so
 the geometric typicality test sign-flips them and asks whether their
-**mean** is displaced from $`O = (0, 0)`$.
+**mean** is displaced from \\O = (0, 0)\\.
 
 ## The test
 
@@ -112,7 +112,7 @@ do.call(rbind, lapply(levels(treatment), function(g) {
 ```
 
 The contrast is clear – with the caveat that group `A` (n = 4) is far
-too small for the test to reach significance (with only $`2^{3}`$
+too small for the test to reach significance (with only \\2^{3}\\
 sign-flips the smallest attainable p-value is large). Pooling the two
 treatment groups gives adequate size:
 
@@ -135,7 +135,7 @@ res_treated
 #> 95% compatibility : principal kappa-ellipsoid, kappa = 0.9828
 ```
 
-- The **control** group’s mean effect is essentially at $`O`$
+- The **control** group’s mean effect is essentially at \\O\\
   (`D = 0.15`, `p = 1`): its before/after measurements are
   interchangeable – exactly what “no effect” should look like.
 - The **treated** group’s mean effect is notable and atypical
@@ -154,11 +154,11 @@ ellipse; the null point O lies outside
 it.](geometric-typicality_files/figure-html/plot-1.png)
 
 The cloud of effect-vectors has its mean **G** well to the right of the
-null point **P** = $`O`$, along **axis 1**: after treatment, responses
+null point **P** = \\O\\, along **axis 1**: after treatment, responses
 rose to a higher *overall level*, with little change of *shape* (axis
 2). Because **P** lies outside the dashed compatibility ellipse, the
 mean effect is significant at the 5% level. Had the effect been null –
-as for the control group – $`O`$ would have fallen inside the region.
+as for the control group – \\O\\ would have fallen inside the region.
 
 ## Why *geometric* typicality here?
 
@@ -178,7 +178,7 @@ example:
 
 ## Practical notes
 
-- **Exact vs. Monte Carlo.** Up to ~17 subjects the $`2^{n-1}`$
+- **Exact vs. Monte Carlo.** Up to ~17 subjects the \\2^{n-1}\\
   sign-flips are enumerated exactly; beyond that, `max_samples` of them
   are drawn at random (set `seed`).
 - **The principal plane.** The test is run on the axes you pass

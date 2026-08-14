@@ -261,7 +261,7 @@ them:
   exhaustively or by Monte Carlo.
 - **Significance vs. magnitude, again.** The magnitude of a v-test
   conflates the size of the deviation with the size of the group — it
-  grows like $`\sqrt{n_c}`$ — and it comes with no effect size and no
+  grows like \\\sqrt{n_c}\\ — and it comes with no effect size and no
   compatibility region. The typicality test separates the two (`D`
   alongside `p`) and returns the region.
 

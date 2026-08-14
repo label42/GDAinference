@@ -11,7 +11,13 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -90,9 +96,8 @@ of a subject would be interchangeable – so each subject’s effect-vector
 would be just as likely to point one way as the opposite. Flipping the
 sign of each effect-vector in every possible way builds the reference
 distribution, and we ask how far the observed mean effect is from the
-<strong>null point</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>
-(“no effect”).</p>
+<strong>null point</strong> <span class="math inline">\(O\)</span> (“no
+effect”).</p>
 </blockquote>
 <p><code><a href="../reference/typicality_geom.html">typicality_geom()</a></code> does this, in the principal plane of a
 GDA, returning a p-value and a compatibility region.</p>
@@ -156,8 +161,8 @@ coordinates:</p>
 <p>These 16 effect-vectors form a cloud. Under “no effect”, each one is
 equally likely to point either way (the reflection argument above), so
 the geometric typicality test sign-flips them and asks whether their
-<strong>mean</strong> is displaced from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O = (0, 0)</annotation></semantics></math>.</p>
+<strong>mean</strong> is displaced from <span class="math inline">\(O =
+(0, 0)\)</span>.</p>
 </div>
 <div class="section level2">
 <h2 id="the-test">The test<a class="anchor" aria-label="anchor" href="#the-test"></a>
@@ -177,9 +182,9 @@ the geometric typicality test sign-flips them and asks whether their
 <span><span class="co">#&gt; 3       B 7 2.06  0.0312    TRUE</span></span></code></pre></div>
 <p>The contrast is clear – with the caveat that group <code>A</code> (n
 = 4) is far too small for the test to reach significance (with only
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mn>3</mn></msup><annotation encoding="application/x-tex">2^{3}</annotation></semantics></math>
-sign-flips the smallest attainable p-value is large). Pooling the two
-treatment groups gives adequate size:</p>
+<span class="math inline">\(2^{3}\)</span> sign-flips the smallest
+attainable p-value is large). Pooling the two treatment groups gives
+adequate size:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_control</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/typicality_geom.html">typicality_geom</a></span><span class="op">(</span><span class="va">effect</span><span class="op">[</span><span class="va">treatment</span> <span class="op">==</span> <span class="st">"control"</span>, <span class="op">]</span>, point <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res_treated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/typicality_geom.html">typicality_geom</a></span><span class="op">(</span><span class="va">effect</span><span class="op">[</span><span class="va">treatment</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, <span class="op">]</span>,</span>
@@ -198,10 +203,9 @@ treatment groups gives adequate size:</p>
 <span><span class="co">#&gt; 95% compatibility : principal kappa-ellipsoid, kappa = 0.9828</span></span></code></pre></div>
 <ul>
 <li>The <strong>control</strong> group’s mean effect is essentially at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>
-(<code>D = 0.15</code>, <code>p = 1</code>): its before/after
-measurements are interchangeable – exactly what “no effect” should look
-like.</li>
+<span class="math inline">\(O\)</span> (<code>D = 0.15</code>,
+<code>p = 1</code>): its before/after measurements are interchangeable –
+exactly what “no effect” should look like.</li>
 <li>The <strong>treated</strong> group’s mean effect is notable and
 atypical (<code>D = 2.07</code>, <code>p = 0.002</code>): the
 intervention produced a genuine shift.</li>
@@ -212,15 +216,13 @@ moved:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_treated</span><span class="op">)</span></span></code></pre></div>
 <p><img src="geometric-typicality_files/figure-html/plot-1.png" class="r-plt" alt="Effect-vectors of the treated group with the 95% compatibility ellipse; the null point O lies outside it." width="624" style="display: block; margin: auto;"></p>
 <p>The cloud of effect-vectors has its mean <strong>G</strong> well to
-the right of the null point <strong>P</strong> =
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>,
-along <strong>axis 1</strong>: after treatment, responses rose to a
-higher <em>overall level</em>, with little change of <em>shape</em>
-(axis 2). Because <strong>P</strong> lies outside the dashed
-compatibility ellipse, the mean effect is significant at the 5% level.
-Had the effect been null – as for the control group –
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>
-would have fallen inside the region.</p>
+the right of the null point <strong>P</strong> = <span class="math inline">\(O\)</span>, along <strong>axis 1</strong>: after
+treatment, responses rose to a higher <em>overall level</em>, with
+little change of <em>shape</em> (axis 2). Because <strong>P</strong>
+lies outside the dashed compatibility ellipse, the mean effect is
+significant at the 5% level. Had the effect been null – as for the
+control group – <span class="math inline">\(O\)</span> would have fallen
+inside the region.</p>
 </div>
 <div class="section level2">
 <h2 id="why-geometric-typicality-here">Why <em>geometric</em> typicality here?<a class="anchor" aria-label="anchor" href="#why-geometric-typicality-here"></a>
@@ -245,10 +247,9 @@ appropriate test.</li>
 </h2>
 <ul>
 <li>
-<strong>Exact vs. Monte Carlo.</strong> Up to ~17 subjects the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">2^{n-1}</annotation></semantics></math>
-sign-flips are enumerated exactly; beyond that, <code>max_samples</code>
-of them are drawn at random (set <code>seed</code>).</li>
+<strong>Exact vs. Monte Carlo.</strong> Up to ~17 subjects the <span class="math inline">\(2^{n-1}\)</span> sign-flips are enumerated
+exactly; beyond that, <code>max_samples</code> of them are drawn at
+random (set <code>seed</code>).</li>
 <li>
 <strong>The principal plane.</strong> The test is run on the axes
 you pass (<code>axes</code>); read it on the plane you interpret, as in

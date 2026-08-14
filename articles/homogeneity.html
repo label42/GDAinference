@@ -11,7 +11,13 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -184,15 +190,14 @@ The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sr</span><span class="op">)</span></span></code></pre></div>
 <p><img src="homogeneity_files/figure-html/sr-plot-1.png" class="r-plt" alt="Observed deviation between the two group means and its 95% compatibility region; the null point O lies far outside." width="672" style="display: block; margin: auto;"></p>
-<p>The orange point is the observed deviation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><msub><mi>c</mi><mn>2</mn></msub></msub><mo>−</mo><msub><mi>G</mi><msub><mi>c</mi><mn>1</mn></msub></msub></mrow><annotation encoding="application/x-tex">G_{c_2} - G_{c_1}</annotation></semantics></math>
-(retired minus students); it runs along <strong>axis 1</strong>, the
-volume of practices. The dashed <strong>95% compatibility
-region</strong> around it is the set of deviations compatible with the
-data. The null point <strong>O</strong> = “no difference” lies far
-outside it – the geometric face of <code>p &lt; 0.05</code>. Note how
-<em>small</em> the region is: with hundreds of individuals the deviation
-is pinned down tightly, so the difference is certified with ease.</p>
+<p>The orange point is the observed deviation <span class="math inline">\(G_{c_2} - G_{c_1}\)</span> (retired minus
+students); it runs along <strong>axis 1</strong>, the volume of
+practices. The dashed <strong>95% compatibility region</strong> around
+it is the set of deviations compatible with the data. The null point
+<strong>O</strong> = “no difference” lies far outside it – the geometric
+face of <code>p &lt; 0.05</code>. Note how <em>small</em> the region is:
+with hundreds of individuals the deviation is pinned down tightly, so
+the difference is certified with ease.</p>
 </div>
 <div class="section level2">
 <h2 id="significance-and-size-of-differences">Significance and size of differences<a class="anchor" aria-label="anchor" href="#significance-and-size-of-differences"></a>
@@ -373,9 +378,9 @@ signed, one-sided comparison of the two group means, with an exact
 compatibility <em>interval</em> – useful to test a contrast on one
 interpreted axis. The direction is taken from the observed difference,
 so for a <em>non-directional</em> claim compare the one-sided p-value to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">\alpha/2</annotation></semantics></math>
-(this matches the interval, which excludes zero exactly when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mi>α</mi><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">p &lt; \alpha/2</annotation></semantics></math>).</li>
+<span class="math inline">\(\alpha/2\)</span> (this matches the
+interval, which excludes zero exactly when <span class="math inline">\(p
+&lt; \alpha/2\)</span>).</li>
 <li>
 <strong>Other GDA packages.</strong> The same calls work on a
 GDAtools <code>speMCA</code> / <code>csMCA</code> or an ade4

@@ -129,7 +129,7 @@ plot(sr)
 compatibility region; the null point O lies far
 outside.](homogeneity_files/figure-html/sr-plot-1.png)
 
-The orange point is the observed deviation $`G_{c_2} - G_{c_1}`$
+The orange point is the observed deviation \\G\_{c_2} - G\_{c_1}\\
 (retired minus students); it runs along **axis 1**, the volume of
 practices. The dashed **95% compatibility region** around it is the set
 of deviations compatible with the data. The null point **O** = “no
@@ -307,8 +307,8 @@ while its difference from a neighbour is negligible.
   compatibility *interval* – useful to test a contrast on one
   interpreted axis. The direction is taken from the observed difference,
   so for a *non-directional* claim compare the one-sided p-value to
-  $`\alpha/2`$ (this matches the interval, which excludes zero exactly
-  when $`p < \alpha/2`$).
+  \\\alpha/2\\ (this matches the interval, which excludes zero exactly
+  when \\p \< \alpha/2\\).
 - **Other GDA packages.** The same calls work on a GDAtools `speMCA` /
   `csMCA` or an ade4 `dudi.pca` / `dudi.acm`; pass that object, and the
   grouping variable as a vector when it is not stored in the object.
